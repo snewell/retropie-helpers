@@ -52,7 +52,7 @@ if ! make_mc_symlink "${rom_without_extension}" "${full_shared_memcard32_path}" 
 fi
 
 # start the game
-flatpak run net.pcsx2.PCSX2 -fullscreen "${rom_name}"
+xdelta-patcher.sh flatpak run net.pcsx2.PCSX2 -fullscreen "${rom_name}"
 # try to clean up symlinks
 rm "${full_shared_memcard8_path}"
 rm "${full_shared_memcard32_path}"
