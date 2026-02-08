@@ -39,25 +39,22 @@ def _make_symlinks(target_list, scratch):
     return links
 
 
-_CUE_FILE_PATTERN = re.compile(r'^FILE\s+"(.*)"')
-
-
-def _patch_cue(filename, scratch):
-    cue_dir = os.path.dirname(filename)
+def _patch_tracklist_file(filename, scratch, pattern):
+    track_dir = os.path.dirname(filename)
     skipped = []
     patched = []
-    with open(filename, "r") as cue_file:
-        for line in cue_file:
-            m = _CUE_FILE_PATTERN.match(line)
+    with open(filename, "r") as track_file:
+        for line in track_file:
+            m = pattern.match(line)
             if m:
-                cue_part = os.path.join(cue_dir, m.group(1))
-                base, ext = os.path.splitext(cue_part)
+                track_part = os.path.join(track_dir, m.group(1))
+                base, ext = os.path.splitext(track_part)
                 patch_file = base + ".xdelta"
                 if os.path.exists(patch_file):
-                    out_file = _do_xdelta(cue_part, patch_file, scratch)
+                    out_file = _do_xdelta(track_part, patch_file, scratch)
                     patched.append(out_file)
                 else:
-                    skipped.append(cue_part)
+                    skipped.append(track_part)
     # see if we patched anything
     if patched:
         # make symlinks for everything we skipped
@@ -68,11 +65,34 @@ def _patch_cue(filename, scratch):
         to_clean.extend(_make_symlinks(skipped, scratch))
 
         # make symlinks for any files with the same naming pattern; this make sure things like memory cards area available
-        base, _ = os.path.splitext(filename)
-        possible_links = glob.glob(os.path.join(cue_dir, base) + ".*")
+        base, _ = os.path.splitext(os.path.basename(filename))
+        search_path = os.path.join(track_dir, base) + ".*"
+        possible_links = glob.glob(os.path.join(track_dir, base) + ".*")
         to_clean.extend(_make_symlinks(possible_links, scratch))
         return True, to_clean
-    return False, [filename].extend(skipped)
+    ret = [filename]
+    ret.extend(skipped)
+    return False, ret
+
+
+_CUE_FILE_PATTERN = re.compile(r'^FILE\s+"(.*)"')
+
+
+def _patch_cue(filename, scratch):
+    return _patch_tracklist_file(filename, scratch, _CUE_FILE_PATTERN)
+
+
+_GDI_FILE_PATTERN = re.compile(r"\d+\s+\d+\s+\d+\s+\d+\s+(.*)\s+\d+")
+
+
+def _patch_gdi(filename, scratch):
+    patched, to_clean = _patch_tracklist_file(filename, scratch, _GDI_FILE_PATTERN)
+    if patched:
+        # Save data is, unfortunately, not written in a reliable name.  Symlink to any memory card just to be safe.
+        dirname = os.path.dirname(filename)
+        possible_save_files = glob.glob(os.path.join(dirname, "*A1.bin"))
+        to_clean.extend(_make_symlinks(possible_save_files, scratch))
+    return patched, to_clean
 
 
 def _patch_m3u(filename, scratch):
@@ -109,6 +129,7 @@ def _patch_m3u(filename, scratch):
 
 _SPECIAL_EXTENSIONS = {
     ".cue": _patch_cue,
+    ".gdi": _patch_gdi,
     ".m3u": _patch_m3u,
 }
 
