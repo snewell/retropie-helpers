@@ -61,7 +61,7 @@ like this:
 
   $ cat /opt/retropie/configs/psp/emulators.cfg
   lr-ppsspp = "/opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-ppsspp/ppsspp_libretro.so --config /opt/retropie/configs/psp/retroarch.cfg %ROM%"
-  xdelta-lr-ppsspp = "xdelta-patcher.py /opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-ppsspp/ppsspp_libretro.so --config /opt/retropie/configs/psp/retroarch.cfg %ROM%"
+  xdelta-lr-ppsspp = "xdelta-patcher.py -- /opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-ppsspp/ppsspp_libretro.so --config /opt/retropie/configs/psp/retroarch.cfg %ROM%"
   default = "xdelta-lr-ppsspp"
 
 Copy and paste whatever entry you like, then just prefix it with the relevant
