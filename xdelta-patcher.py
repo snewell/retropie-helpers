@@ -29,6 +29,16 @@ def _do_xdelta(base_file, patch_file, scratch):
     return out_file
 
 
+def _make_symlinks(target_list, scratch):
+    links = []
+    for f in target_list:
+        target_link = os.path.join(scratch, os.path.basename(f))
+        if not os.path.exists(target_link):
+            links.append(target_link)
+            os.symlink(f, target_link)
+    return links
+
+
 _CUE_FILE_PATTERN = re.compile(r'^FILE\s+"(.*)"')
 
 
@@ -55,24 +65,51 @@ def _patch_cue(filename, scratch):
         os.symlink(filename, launch_file)
         to_clean = [launch_file]
         to_clean.extend(patched)
-        for f in skipped:
-            target_link = os.path.join(scratch, os.path.basename(f))
-            to_clean.append(target_link)
-            os.symlink(f, target_link)
+        to_clean.extend(_make_symlinks(skipped, scratch))
 
         # make symlinks for any files with the same naming pattern; this make sure things like memory cards area available
         base, _ = os.path.splitext(filename)
-        for f in glob.glob(os.path.join(cue_dir, base) + ".*"):
-            target_link = os.path.join(scratch, os.path.basename(f))
-            if not os.path.exists(target_link):
-                to_clean.append(target_link)
-                os.symlink(f, target_link)
+        possible_links = glob.glob(os.path.join(cue_dir, base) + ".*")
+        to_clean.extend(_make_symlinks(possible_links, scratch))
+        return True, to_clean
+    return False, [filename].extend(skipped)
+
+
+def _patch_m3u(filename, scratch):
+    m3u_dir = os.path.dirname(filename)
+    skipped = []
+    patched = []
+    entries = []
+    with open(filename, "r") as m3u_file:
+        for line in m3u_file:
+            m3u_chunk = line.rstrip()
+            real_file = os.path.join(m3u_dir, m3u_chunk)
+            p, to_clean = patch_file(real_file, scratch)
+            if p:
+                patched.extend(to_clean)
+            else:
+                skipped.extend(to_clean)
+            entries.append(os.path.basename(m3u_chunk))
+    if patched:
+        # something got patched, so make a new m3u
+        m3u_path = os.path.join(scratch, os.path.basename(filename))
+        with open(m3u_path, "w") as new_m3u:
+            new_m3u.write("\n".join(entries))
+
+        # now make symlinks for everything that wasn't patched'
+        to_clean = [m3u_path]
+        to_clean.extend(patched)
+        to_clean.extend(_make_symlinks(skipped, scratch))
+        base, _ = os.path.splitext(filename)
+        possible_links = glob.glob(os.path.join(m3u_dir, base) + ".*")
+        to_clean.extend(_make_symlinks(possible_links, scratch))
         return True, to_clean
     return False, [filename]
 
 
 _SPECIAL_EXTENSIONS = {
     ".cue": _patch_cue,
+    ".m3u": _patch_m3u,
 }
 
 
@@ -138,7 +175,12 @@ def main():
         else:
             ex_files = os.listdir(args.scratch)
             for f in target:
-                ex_files.remove(f)
+                entry = os.path.basename(f)
+                try:
+                    ex_files.remove(entry)
+                except ValueError:
+                    # don't care, we'll just copy it back
+                    pass
         if ex_files:
             target_dir = os.path.dirname(args.filename)
             for f in ex_files:
