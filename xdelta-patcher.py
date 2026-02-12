@@ -4,10 +4,11 @@ import argparse
 import glob
 import os
 import os.path
-import re
 import shutil
 import subprocess
 import sys
+
+import utils
 
 _DEFAULT_SCRATCH = "/mnt/scratch"
 
@@ -39,22 +40,22 @@ def _make_symlinks(target_list, scratch):
     return links
 
 
-def _patch_tracklist_file(filename, scratch, pattern):
+def _patch_tracklist_file(filename, scratch, iterate_fn):
     track_dir = os.path.dirname(filename)
     skipped = []
     patched = []
-    with open(filename, "r") as track_file:
-        for line in track_file:
-            m = pattern.match(line)
-            if m:
-                track_part = os.path.join(track_dir, m.group(1))
-                base, ext = os.path.splitext(track_part)
-                patch_file = base + ".xdelta"
-                if os.path.exists(patch_file):
-                    out_file = _do_xdelta(track_part, patch_file, scratch)
-                    patched.append(out_file)
-                else:
-                    skipped.append(track_part)
+
+    def _cb(track_file):
+        track_part = os.path.join(track_dir, track_file)
+        base, ext = os.path.splitext(track_part)
+        patch_file = base + ".xdelta"
+        if os.path.exists(patch_file):
+            out_file = _do_xdelta(track_part, patch_file, scratch)
+            patched.append(out_file)
+        else:
+            skipped.append(track_part)
+
+    iterate_fn(filename, _cb)
     # see if we patched anything
     if patched:
         # make symlinks for everything we skipped
@@ -75,18 +76,14 @@ def _patch_tracklist_file(filename, scratch, pattern):
     return False, ret
 
 
-_CUE_FILE_PATTERN = re.compile(r'^FILE\s+"(.*)"')
-
-
 def _patch_cue(filename, scratch):
-    return _patch_tracklist_file(filename, scratch, _CUE_FILE_PATTERN)
-
-
-_GDI_FILE_PATTERN = re.compile(r"\d+\s+\d+\s+\d+\s+\d+\s+(.*)\s+\d+")
+    return _patch_tracklist_file(filename, scratch, utils.iterate_cue_tracks)
 
 
 def _patch_gdi(filename, scratch):
-    patched, to_clean = _patch_tracklist_file(filename, scratch, _GDI_FILE_PATTERN)
+    patched, to_clean = _patch_tracklist_file(
+        filename, scratch, utils.iterate_gdi_tracks
+    )
     if patched:
         # Save data is, unfortunately, not written in a reliable name.  Symlink to any memory card just to be safe.
         dirname = os.path.dirname(filename)
@@ -120,7 +117,7 @@ def _patch_m3u(filename, scratch):
         to_clean = [m3u_path]
         to_clean.extend(patched)
         to_clean.extend(_make_symlinks(skipped, scratch))
-        base, _ = os.path.splitext(filename)
+        base, _ = os.path.splitext(os.path.basename(filename))
         possible_links = glob.glob(os.path.join(m3u_dir, base) + ".*")
         to_clean.extend(_make_symlinks(possible_links, scratch))
         return True, to_clean
