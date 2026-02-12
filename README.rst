@@ -25,6 +25,14 @@ Available Scripts
   You'll need to manually get a copy of a working systemd, but it's easy to
   download/build yourself.  The wrapper directory is hardcoded in this scipt.
 
+:code:`multifile-validator.py`
+  Checks multifile games (i.e., m3u, cue, gdi) and makes sure all referenced files
+  actually exist.  My files were a mess with mixed case and manual renames when I
+  managed patches manually and tried to clean up the view in EmulationStation, so
+  this was a way to make sure everything was set up properly.
+
+  Run once, fix any errors, never think about it again.
+
 :code:`ps3-wrapper.sh`
   PS3 games are folders, which I find untidy.  This mounts a disc to a temporary
   directory and passes the appropriate path the emulator.  There are obvious
