@@ -97,16 +97,17 @@ def _patch_m3u(filename, scratch):
     skipped = []
     patched = []
     entries = []
-    with open(filename, "r") as m3u_file:
-        for line in m3u_file:
-            m3u_chunk = line.rstrip()
-            real_file = os.path.join(m3u_dir, m3u_chunk)
-            p, to_clean = patch_file(real_file, scratch)
-            if p:
-                patched.extend(to_clean)
-            else:
-                skipped.extend(to_clean)
-            entries.append(os.path.basename(m3u_chunk))
+
+    def _file_cb(m3u_chunk):
+        real_file = os.path.join(m3u_dir, m3u_chunk)
+        p, to_clean = patch_file(real_file, scratch)
+        if p:
+            patched.extend(to_clean)
+        else:
+            skipped.extend(to_clean)
+        entries.append(os.path.basename(m3u_chunk))
+
+    utils.iterate_m3u_files(filename, _file_cb)
     if patched:
         # something got patched, so make a new m3u
         m3u_path = os.path.join(scratch, os.path.basename(filename))

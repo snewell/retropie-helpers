@@ -21,3 +21,9 @@ _GDI_FILE_PATTERN = re.compile(r"\d+\s+\d+\s+\d+\s+\d+\s+(.*)\s+\d+")
 
 def iterate_gdi_tracks(filename, track_cb):
     _iterate_tracklist_file(filename, _GDI_FILE_PATTERN, track_cb)
+
+
+def iterate_m3u_files(filename, file_cb):
+    with open(filename, "r") as m3u_file:
+        for line in m3u_file:
+            file_cb(line.rstrip())
