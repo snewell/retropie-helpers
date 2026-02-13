@@ -56,6 +56,11 @@ Available Scripts
 
     tmpfs   /mnt/scratch   tmpfs   size=10G,uid=pi,gid=pi,mode=755,noatime 0 0
 
+:code:`launch_pcsx2.sh`
+  Helper script to execute PCSX2 with scripts strung togetehr properly.  This is
+  purely to make my life simpler instead of maintaining the PS2
+  :code:`emulators.cfg`.
+
 
 Using the Scripts
 -----------------
