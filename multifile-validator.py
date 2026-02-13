@@ -3,6 +3,7 @@
 import argparse
 import os
 import os.path
+import sys
 
 import utils
 
@@ -59,7 +60,7 @@ _MULTIFILE_EXTENSIONS = {
 
 
 def _check_file(filename):
-    base, ext = os.path.splitext(filename)
+    _, ext = os.path.splitext(filename)
     ext_fn = _MULTIFILE_EXTENSIONS.get(ext)
     if ext_fn:
         return ext_fn(filename)
@@ -70,7 +71,7 @@ def _check_file(filename):
 def main():
     parser = argparse.ArgumentParser(
         prog="multifile-validator",
-        description="Validate games composed of multiple files (e.g., m3u, cue) have all referenced files available",
+        description="Validate games composed of multiple files have all referenced files available",
     )
     parser.add_argument(
         "files",
@@ -82,12 +83,12 @@ def main():
         m = _check_file(f)
         missing.extend(m)
 
+    if not missing:
+        # happy case, no missing files
+        sys.exit(0)
     for m in missing:
         print(f"{m[0]} references missing files: {m[1]}")
-    else:
-        # empty list
-        exit(0)
-    exit(1)
+    sys.exit(1)
 
 
 if __name__ == "__main__":

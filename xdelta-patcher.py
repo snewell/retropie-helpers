@@ -6,7 +6,6 @@ import os
 import os.path
 import shutil
 import subprocess
-import sys
 
 import utils
 
@@ -47,7 +46,7 @@ def _patch_tracklist_file(filename, scratch, iterate_fn):
 
     def _cb(track_file):
         track_part = os.path.join(track_dir, track_file)
-        base, ext = os.path.splitext(track_part)
+        base, _ = os.path.splitext(track_part)
         patch_file = base + ".xdelta"
         if os.path.exists(patch_file):
             out_file = _do_xdelta(track_part, patch_file, scratch)
@@ -65,9 +64,9 @@ def _patch_tracklist_file(filename, scratch, iterate_fn):
         to_clean.extend(patched)
         to_clean.extend(_make_symlinks(skipped, scratch))
 
-        # make symlinks for any files with the same naming pattern; this make sure things like memory cards area available
+        # make symlinks for any files with the same naming pattern; this make
+        # sure things like memory cards area available
         base, _ = os.path.splitext(os.path.basename(filename))
-        search_path = os.path.join(track_dir, base) + ".*"
         possible_links = glob.glob(os.path.join(track_dir, base) + ".*")
         to_clean.extend(_make_symlinks(possible_links, scratch))
         return True, to_clean
@@ -85,7 +84,8 @@ def _patch_gdi(filename, scratch):
         filename, scratch, utils.iterate_gdi_tracks
     )
     if patched:
-        # Save data is, unfortunately, not written in a reliable name.  Symlink to any memory card just to be safe.
+        # Save data is, unfortunately, not written in a reliable name.  Symlink
+        # to any memory card just to be safe.
         dirname = os.path.dirname(filename)
         possible_save_files = glob.glob(os.path.join(dirname, "*A1.bin"))
         to_clean.extend(_make_symlinks(possible_save_files, scratch))
@@ -100,7 +100,7 @@ def _patch_m3u(filename, scratch):
 
     def _file_cb(m3u_chunk):
         real_file = os.path.join(m3u_dir, m3u_chunk)
-        p, to_clean = patch_file(real_file, scratch)
+        p, to_clean = _patch_file(real_file, scratch)
         if p:
             patched.extend(to_clean)
         else:
@@ -111,7 +111,7 @@ def _patch_m3u(filename, scratch):
     if patched:
         # something got patched, so make a new m3u
         m3u_path = os.path.join(scratch, os.path.basename(filename))
-        with open(m3u_path, "w") as new_m3u:
+        with open(m3u_path, "w", encoding="utf-8") as new_m3u:
             new_m3u.write("\n".join(entries))
 
         # now make symlinks for everything that wasn't patched'
@@ -132,7 +132,7 @@ _SPECIAL_EXTENSIONS = {
 }
 
 
-def patch_file(filename, scratch):
+def _patch_file(filename, scratch):
     base, ext = os.path.splitext(filename)
     ext_fn = _SPECIAL_EXTENSIONS.get(ext)
     if ext_fn:
@@ -170,42 +170,38 @@ def main():
     args = parser.parse_args()
     if args.scratch is None:
         args.scratch = _DEFAULT_SCRATCH
-    if args.filename is None:
-        # try to steal the last floating argument
-        if len(args.args) < 1:
-            print("Error: no filename and no args to steal from", file=sys.stderr)
-            exit(1)
-        args.filename = args.args[-1]
-        args.args = args.args[:-1]
-    patched, target = patch_file(args.filename, args.scratch)
+    args.filename, args.args = utils.get_filename_and_args(args.filename, args.args)
+    patched, target = _patch_file(args.filename, args.scratch)
 
-    if args.args:
-        # everything is patched, execute
-        args.args.append(target[0])
-        subprocess.run(args.args)
+    try:
+        if args.args:
+            # everything is patched, execute
+            args.args.append(target[0])
+            subprocess.run(args.args, check=True)
 
-    if patched:
-        ex_files = None
-        if not args.preserve:
-            for f in target:
-                os.remove(f)
-            # anything left needs to be copied back to the original folder
-            ex_files = os.listdir(args.scratch)
-        else:
-            ex_files = os.listdir(args.scratch)
-            for f in target:
-                entry = os.path.basename(f)
-                try:
-                    ex_files.remove(entry)
-                except ValueError:
-                    # don't care, we'll just copy it back
-                    pass
-        if ex_files:
-            target_dir = os.path.dirname(args.filename)
-            for f in ex_files:
-                full_file = os.path.join(args.scratch, f)
-                shutil.copy(full_file, target_dir)
-                os.remove(full_file)
+    finally:
+        if patched:
+            ex_files = None
+            if not args.preserve:
+                for f in target:
+                    os.remove(f)
+                # anything left needs to be copied back to the original folder
+                ex_files = os.listdir(args.scratch)
+            else:
+                ex_files = os.listdir(args.scratch)
+                for f in target:
+                    entry = os.path.basename(f)
+                    try:
+                        ex_files.remove(entry)
+                    except ValueError:
+                        # don't care, we'll just copy it back
+                        pass
+            if ex_files:
+                target_dir = os.path.dirname(args.filename)
+                for f in ex_files:
+                    full_file = os.path.join(args.scratch, f)
+                    shutil.copy(full_file, target_dir)
+                    os.remove(full_file)
 
 
 if __name__ == "__main__":

@@ -4,6 +4,8 @@ import argparse
 import os.path
 import subprocess
 
+import utils
+
 _SHARED_MEMCARD8 = "Mcd001.ps2"
 _SHARED_MEMCARD32 = "Shared Memory Card (32 MB).ps2"
 
@@ -18,7 +20,7 @@ def _verify_no_cards(memcards):
 
 def _setup_card_links(romfile, memcards):
     romdir = os.path.dirname(romfile)
-    base, ext = os.path.splitext(romfile)
+    base, _ = os.path.splitext(romfile)
     for m, l in memcards:
         save_path = os.path.join(romdir, f"{base}.{l}")
         os.symlink(save_path, m)
@@ -57,13 +59,7 @@ def main():
         nargs="*",
     )
     args = parser.parse_args()
-    if args.filename is None:
-        # try to steal the last floating argument
-        if len(args.args) < 1:
-            print("Error: no filename and no args to steal from", file=sys.stderr)
-            exit(1)
-        args.filename = args.args[-1]
-        args.args = args.args[:-1]
+    args.filename, args.args = utils.get_filename_and_args(args.filename, args.args)
     if args.memcard8_path is None:
         rom_dir = os.path.dirname(args.filename)
         args.memcard8_path = os.path.join(rom_dir, _DEFAULT_CARD_DIR, _SHARED_MEMCARD8)
@@ -84,9 +80,9 @@ def main():
         if args.args:
             # everything is patched, execute
             args.args.append(args.filename)
-            subprocess.run(args.args)
+            subprocess.run(args.args, check=True)
     finally:
-        for m, l in memcards:
+        for m, _ in memcards:
             os.remove(m)
 
 
