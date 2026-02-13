@@ -38,7 +38,7 @@ Available Scripts
   directory and passes the appropriate path the emulator.  There are obvious
   checks to see if it's working with a directory or a symlink.
 
-:code:`unique-mem-card.sh`
+:code:`unique-memcard.py`
   I prefer unique save data per game, but PCSX2 uses shared memory cards.  This
   just sets up symlinks to make this happen.
 
