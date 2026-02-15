@@ -18,11 +18,10 @@ def _verify_no_cards(memcards):
             raise RuntimeError(f"Memory card already exists: {mcd[0]}")
 
 
-def _setup_card_links(romfile, memcards):
-    romdir = os.path.dirname(romfile)
-    base, _ = os.path.splitext(romfile)
+def _setup_card_links(romfile, memcards, savedir):
+    base, _ = os.path.splitext(os.path.basename(romfile))
     for m, l in memcards:
-        save_path = os.path.join(romdir, f"{base}.{l}")
+        save_path = os.path.join(savedir, f"{base}.{l}")
         os.symlink(save_path, m)
 
 
@@ -44,12 +43,17 @@ def main():
     )
     parser.add_argument(
         "-s",
+        "--save-dir",
+        help="Path for per-game memory cards (defaults to content directory)",
+    )
+    parser.add_argument(
+        "-e",
         "--srm8-extension",
         help="Extension for an 8MB per-game memory card",
         default="srm8",
     )
     parser.add_argument(
-        "-S",
+        "-E",
         "--srm32-extension",
         help="Extension for an 32MB per-game memory card",
         default="srm32",
@@ -60,11 +64,12 @@ def main():
     )
     args = parser.parse_args()
     args.filename, args.args = utils.get_filename_and_args(args.filename, args.args)
+    rom_dir = os.path.dirname(args.filename)
+    if args.save_dir is None:
+        args.save_dir = rom_dir
     if args.memcard8_path is None:
-        rom_dir = os.path.dirname(args.filename)
         args.memcard8_path = os.path.join(rom_dir, _DEFAULT_CARD_DIR, _SHARED_MEMCARD8)
     if args.memcard32_path is None:
-        rom_dir = os.path.dirname(args.filename)
         args.memcard32_path = os.path.join(
             rom_dir, _DEFAULT_CARD_DIR, _SHARED_MEMCARD32
         )
@@ -74,7 +79,7 @@ def main():
         (args.memcard32_path, args.srm32_extension),
     ]
     _verify_no_cards(memcards)
-    _setup_card_links(args.filename, memcards)
+    _setup_card_links(args.filename, memcards, args.save_dir)
 
     try:
         if args.args:
