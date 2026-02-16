@@ -11,8 +11,17 @@ These have been tested only on my setup, which looks mostly like this:
 * Install `RetroPie-Setup-Ubuntu`_
 * Manually adding emulator entries to the various emulator configs
 
-Available Scripts
------------------
+
+Emulator-Related Scripts
+------------------------
+These scripts perform some setup before an emulator is launched.  They're all
+designed to execute something else in the chain, passing along appropriate
+arguments, until ultimately the emulator is run.
+
+You'll need to make a new entry in a system's :code:`emulators.cfg` file.  More
+details are in `Using the Scripts`_.  If a system needs multiple scripts, it's
+easier to make a launch script; examples are in `Utility Scripts`_.
+
 :code:`dolpin-wrapper.sh`
   Forces a different version of systemd to be pre-loaded.  This gets around a bug
   in the systemd version installed in Ubuntu 24.04 (TODO: find the bug again and
@@ -24,14 +33,6 @@ Available Scripts
 
   You'll need to manually get a copy of a working systemd, but it's easy to
   download/build yourself.  The wrapper directory is hardcoded in this scipt.
-
-:code:`multifile-validator.py`
-  Checks multifile games (i.e., m3u, cue, gdi) and makes sure all referenced files
-  actually exist.  My files were a mess with mixed case and manual renames when I
-  managed patches manually and tried to clean up the view in EmulationStation, so
-  this was a way to make sure everything was set up properly.
-
-  Run once, fix any errors, never think about it again.
 
 :code:`ps3-wrapper.sh`
   PS3 games are folders, which I find untidy.  This mounts a disc to a temporary
@@ -56,10 +57,39 @@ Available Scripts
 
     tmpfs   /mnt/scratch   tmpfs   size=10G,uid=pi,gid=pi,mode=755,noatime 0 0
 
+
+Utility Scripts
+---------------
+Everything here is designed to simplify launching an emulator that requires
+multiple scripts chained together.  The arguments match my setup, but should be
+obvious to tweak for your preferences.
+
 :code:`launch_pcsx2.sh`
-  Helper script to execute PCSX2 with scripts strung togetehr properly.  This is
+  Helper script to execute PCSX2 with scripts strung together properly.  This is
   purely to make my life simpler instead of maintaining the PS2
   :code:`emulators.cfg`.
+
+
+Maintainence Scripts
+--------------------
+These are purely to help setup/manage an installation.  For the most part, these
+can be run once then ignored until you need them again.
+
+:code:`make-save-folders.py`
+  Create system-specific folders for save data.  By default, a retropie setup
+  puts save data (persistent and states) in the content folder, which leads to
+  them getting cluttered.  I already put save states in their own folder, but this
+  makes it easier to separate persistent save data.
+
+  Each system needs its own folder to avoid situation where the same title is
+  present in multiple systems.
+
+:code:`multifile-validator.py`
+  Checks multifile games (i.e., m3u, cue, gdi) and makes sure all referenced files
+  actually exist.  My files were a mess with mixed case and manual renames when I
+  managed patches manually and tried to clean up the view in EmulationStation, so
+  this was a way to make sure everything was set up properly.
+
 
 
 Using the Scripts
