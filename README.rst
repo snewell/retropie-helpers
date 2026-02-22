@@ -90,6 +90,13 @@ can be run once then ignored until you need them again.
   managed patches manually and tried to clean up the view in EmulationStation, so
   this was a way to make sure everything was set up properly.
 
+:code:`setup-shared-memcard.py`
+  Creates symlinks to share memory cards across games.  The main goal is to be able
+  to use tab-completion when saves are in a unique directory.  This script assumes
+  save filenames are based on the game's filename (e.g., :code:`Some-Game.game` will
+  use :code:`Some-Game.sav`), so if save files are based on something else (e.g., an
+  emulator uses an internal identifier) this script won't help.
+
 
 
 Using the Scripts
