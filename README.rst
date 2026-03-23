@@ -62,12 +62,15 @@ Utility Scripts
 ---------------
 Everything here is designed to simplify launching an emulator that requires
 multiple scripts chained together.  The arguments match my setup, but should be
-obvious to tweak for your preferences.
+obvious to tweak for your preferences.  The main benefit is keeping arguments
+out of :code:`emulators.cfg`, but in theory these could be smart enough to read
+arguments from config or environment files.
 
-:code:`launch_pcsx2.sh`
-  Helper script to execute PCSX2 with scripts strung together properly.  This is
-  purely to make my life simpler instead of maintaining the PS2
-  :code:`emulators.cfg`.
+:code:`launch-dolphin.sh`
+  Helper script to execute dolphin with scripts strung together properly.
+
+:code:`launch-pcsx2.sh`
+  Helper script to execute PCSX2 with scripts piped together in the right order.
 
 
 Maintainence Scripts
