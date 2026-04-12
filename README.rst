@@ -23,10 +23,11 @@ details are in `Using the Scripts`_.  If a system needs multiple scripts, it's
 easier to make a launch script; examples are in `Utility Scripts`_.
 
 :code:`dolpin-wrapper.sh`
-  Forces a different version of systemd to be pre-loaded.  This gets around a bug
-  in the systemd version installed in Ubuntu 24.04 (TODO: find the bug again and
-  link to it) that caused dolphin to sometimes crash.  Since I didn't want to mess
-  with the system-wide version of systemd, this lets me get around the bug.
+  Forces a different version of systemd to be pre-loaded.  This gets around a
+  `bug <https://github.com/systemd/systemd/issues/35288>`__ in the systemd
+  version installed in Ubuntu 24.04 that caused dolphin to sometimes crash.
+  Since I didn't want to mess with the system-wide version of systemd, this lets
+  me avoid the crash.
 
   First attempt was to disable systemd support in dolphin, but that never seemed
   to work.
@@ -131,9 +132,6 @@ Make sure these scripts are in :code:`PATH`.  The easiest way is to edit your
 
 If you want to run these scripts in an interactive shell, add them to your
 :code:`.bashrc` as well.
-
-:code:`unique-mem-card.sh` and :code:`dolphin-wrapper.sh` will call
-:code:`xdelta-patcher.py`.
 
 I'll add more detailed documentation to the scripts at some point.
 
