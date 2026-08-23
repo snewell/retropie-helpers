@@ -176,7 +176,13 @@ def main():
     try:
         if args.args:
             # everything is patched, execute
-            args.args.append(target[0])
+            replaced = False
+            for i in range(len(args.args)):
+                if args.args[i] == args.filename:
+                    args.args[i] = target[0]
+                    replaced = True
+            if not replaced:
+                args.args.append(target[0])
             subprocess.run(args.args, check=True)
 
     finally:
