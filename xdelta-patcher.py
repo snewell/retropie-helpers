@@ -39,7 +39,7 @@ def _make_symlinks(target_list, scratch):
     return links
 
 
-def _patch_tracklist_file(filename, scratch, iterate_fn):
+def _patch_tracklist_file(filename, scratch, make_extra_symlinks, iterate_fn):
     track_dir = os.path.dirname(filename)
     skipped = []
     patched = []
@@ -64,26 +64,29 @@ def _patch_tracklist_file(filename, scratch, iterate_fn):
         to_clean.extend(patched)
         to_clean.extend(_make_symlinks(skipped, scratch))
 
-        # make symlinks for any files with the same naming pattern; this make
-        # sure things like memory cards area available
-        base, _ = os.path.splitext(os.path.basename(filename))
-        possible_links = glob.glob(os.path.join(track_dir, base) + ".*")
-        to_clean.extend(_make_symlinks(possible_links, scratch))
+        if make_extra_symlinks:
+            # make symlinks for any files with the same naming pattern; this make
+            # sure things like memory cards area available
+            base, _ = os.path.splitext(os.path.basename(filename))
+            possible_links = glob.glob(os.path.join(track_dir, base) + ".*")
+            to_clean.extend(_make_symlinks(possible_links, scratch))
         return True, to_clean
     ret = [filename]
     ret.extend(skipped)
     return False, ret
 
 
-def _patch_cue(filename, scratch):
-    return _patch_tracklist_file(filename, scratch, utils.iterate_cue_tracks)
-
-
-def _patch_gdi(filename, scratch):
-    patched, to_clean = _patch_tracklist_file(
-        filename, scratch, utils.iterate_gdi_tracks
+def _patch_cue(filename, scratch, make_extra_symlinks):
+    return _patch_tracklist_file(
+        filename, scratch, make_extra_symlinks, utils.iterate_cue_tracks
     )
-    if patched:
+
+
+def _patch_gdi(filename, scratch, make_extra_symlinks):
+    patched, to_clean = _patch_tracklist_file(
+        filename, scratch, make_extra_symlinks, utils.iterate_gdi_tracks
+    )
+    if patched and make_extra_symlinks:
         # Save data is, unfortunately, not written in a reliable name.  Symlink
         # to any memory card just to be safe.
         dirname = os.path.dirname(filename)
@@ -92,7 +95,7 @@ def _patch_gdi(filename, scratch):
     return patched, to_clean
 
 
-def _patch_m3u(filename, scratch):
+def _patch_m3u(filename, scratch, make_extra_symlinks):
     m3u_dir = os.path.dirname(filename)
     skipped = []
     patched = []
@@ -100,7 +103,7 @@ def _patch_m3u(filename, scratch):
 
     def _file_cb(m3u_chunk):
         real_file = os.path.join(m3u_dir, m3u_chunk)
-        p, to_clean = _patch_file(real_file, scratch)
+        p, to_clean = _patch_file(real_file, scratch, make_extra_symlinks)
         if p:
             patched.extend(to_clean)
         else:
@@ -118,9 +121,10 @@ def _patch_m3u(filename, scratch):
         to_clean = [m3u_path]
         to_clean.extend(patched)
         to_clean.extend(_make_symlinks(skipped, scratch))
-        base, _ = os.path.splitext(os.path.basename(filename))
-        possible_links = glob.glob(os.path.join(m3u_dir, base) + ".*")
-        to_clean.extend(_make_symlinks(possible_links, scratch))
+        if make_extra_symlinks:
+            base, _ = os.path.splitext(os.path.basename(filename))
+            possible_links = glob.glob(os.path.join(m3u_dir, base) + ".*")
+            to_clean.extend(_make_symlinks(possible_links, scratch))
         return True, to_clean
     return False, [filename]
 
@@ -132,11 +136,11 @@ _SPECIAL_EXTENSIONS = {
 }
 
 
-def _patch_file(filename, scratch):
+def _patch_file(filename, scratch, make_extra_symlinks):
     base, ext = os.path.splitext(filename)
     ext_fn = _SPECIAL_EXTENSIONS.get(ext)
     if ext_fn:
-        return ext_fn(filename, scratch)
+        return ext_fn(filename, scratch, make_extra_symlinks)
     # not special cased
     patch_file = base + ".xdelta"
     if os.path.exists(patch_file):
@@ -158,6 +162,12 @@ def main():
     )
     parser.add_argument("-s", "--scratch", help="Scratch directory to use")
     parser.add_argument(
+        "-S",
+        "--symlinks",
+        help="Create symlinks to related files (i.e., memory cards)",
+        action="store_true",
+    )
+    parser.add_argument(
         "-f",
         "--filename",
         help="File to patch",
@@ -171,7 +181,7 @@ def main():
     if args.scratch is None:
         args.scratch = _DEFAULT_SCRATCH
     args.filename, args.args = utils.get_filename_and_args(args.filename, args.args)
-    patched, target = _patch_file(args.filename, args.scratch)
+    patched, target = _patch_file(args.filename, args.scratch, args.symlinks)
 
     try:
         if args.args:
