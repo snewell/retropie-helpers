@@ -16,9 +16,9 @@ run() {
 }
 
 mount_and_run() {
-	sudo mount "${1}" "${MOUNT_POINT}"
+	fuseiso "${1}" "${MOUNT_POINT}"
 	run "${MOUNT_POINT}"
-	sudo umount "${MOUNT_POINT}"
+	fusermount -u "${MOUNT_POINT}"
 }
 
 if [ -f "${1}" ]; then
