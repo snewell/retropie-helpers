@@ -35,10 +35,13 @@ easier to make a launch script; examples are in `Utility Scripts`_.
   You'll need to manually get a copy of a working systemd, but it's easy to
   download/build yourself.  The wrapper directory is hardcoded in this scipt.
 
-:code:`ps3-wrapper.sh`
+:code:`setup-ps3-disc.py`
   PS3 games are folders, which I find untidy.  This mounts a disc to a temporary
   directory and passes the appropriate path the emulator.  There are obvious
   checks to see if it's working with a directory or a symlink.
+
+  The bash version (:code:`ps3-wrapper.sh`) is still present as a fallback since
+  I haven't done much testing on the python version yet.
 
 :code:`unique-memcard.py`
   I prefer unique save data per game, but PCSX2 uses shared memory cards.  This
@@ -72,6 +75,9 @@ arguments from config or environment files.
 
 :code:`launch-pcsx2.sh`
   Helper script to execute PCSX2 with scripts piped together in the right order.
+
+:code:`launch-rpcs3.sh`
+  Helper script to execute RPCS3 with the proper path to a game.
 
 
 Maintainence Scripts
