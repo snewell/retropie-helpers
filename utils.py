@@ -36,3 +36,15 @@ def get_filename_and_args(filename, args):
             raise RuntimeError("Error: no filename and no args to steal from")
         return (args[-1], args[:-1])
     return (filename, args)
+
+
+def replace_args(args, target, replacement):
+    # everything is patched, execute
+    replaced = False
+    for i in range(len(args)):
+        if args[i] == target:
+            args[i] = replacement
+            replaced = True
+    if not replaced:
+        args.append(replacement)
+    return args
