@@ -5,17 +5,12 @@ import subprocess
 
 import utils
 
+_BASE_ROM_PATH = "/home/pi/RetroPie/roms"
 
 def _get_rom_path(args):
-    in_flag = False
     for a in args:
-        if a[0] == "-":
-            in_flag = True
-            continue
-        if in_flag:
-            in_flag = False
-            continue
-        return a
+        if a.startswith(_BASE_ROM_PATH):
+            return a
     raise RuntimeError("Failed to find rom")
 
 
@@ -90,7 +85,7 @@ def _main():
 
     if _should_do_xdelta(args):
         # the rom probably won't be the last argument, so figure it out and pass it explicitly'
-        rom = _get_rom_path(args.args[1:])
+        rom = _get_rom_path(args.args)
         final_command.extend(
             ["xdelta-patcher.py", "-f", rom, *args.xdelta_patcher_arg, "--"]
         )
