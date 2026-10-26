@@ -1,0 +1,42 @@
+# This file is sourced by the retroarch wrapper.  Valid variables to modify are
+# as follows:
+#
+#  - spi_args - an array of arguments that will be passed to the
+#               savepath-injector script
+#  - xdp_args - an array of arguments that will be passed to the xdelta-patcher
+#               script
+#  - orch_args - an array of arguments that will be passed to the orchestrator
+#                script
+#
+# Information variables:
+#
+#  - SYSTEM - the system detected by runcommand (e.g., nes, psp)
+#  - CORE - the retroarch core being used
+#  - ROM - the *full* path to the rom being launched
+
+# This will force save data to be written to system-specfiic folders outside the
+# rom directory.  This makes backups easier, and makes it simpler to eventually
+# support multiple users on the same physical device.
+#
+# If the system in question has a savepath specified, the savepath-injector
+# script will not override it.
+spi_args+=(
+    --save-dir
+    # Saves will be in a per-system folder under this path
+    ~/saves
+)
+
+# If we wanted to use a non-default mount point for the xdelta-patcher, we can
+# do that here.
+xdp_args+=(
+    --scratch
+    /mnt/xdelta-patched-games
+)
+
+# For some reason we don't want to provide xdelta patching for PSP games, so
+# conditionally disable it.
+# if [ "${SYSTEM}" == "psp" ]; then
+#    orch_args+=(
+#        --xdelta-patcher=disable
+#    )
+# fi
