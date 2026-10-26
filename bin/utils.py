@@ -1,3 +1,4 @@
+import pathlib
 import re
 
 
@@ -48,3 +49,15 @@ def replace_args(args, target, replacement):
     if not replaced:
         args.append(replacement)
     return args
+
+
+def get_ra_config_path(args):
+    config_idx = args.index("--config")
+    # if this is out of range, we've got a weird command line; okay to crash, just check the logs
+    return args[config_idx + 1]
+
+
+def get_ra_system_from_path(file_path):
+    # this assumes config/roms live in folders with default names
+    p = pathlib.Path(file_path)
+    return p.parent.name
