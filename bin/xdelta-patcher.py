@@ -180,10 +180,16 @@ def main():
     args = parser.parse_args()
     if args.scratch is None:
         args.scratch = _DEFAULT_SCRATCH
+    args.scratch = os.path.join(args.scratch, str(os.getpid()))
     args.filename, args.args = utils.get_filename_and_args(args.filename, args.args)
-    patched, target = _patch_file(args.filename, args.scratch, args.symlinks)
+    os.makedirs(args.scratch, exist_ok=True)
+
+    # make sure these are set in case the patching fails; don't fail during cleanup'
+    patched = False
+    target = []
 
     try:
+        patched, target = _patch_file(args.filename, args.scratch, args.symlinks)
         if args.args:
             # everything is patched, execute
             replaced = False
@@ -218,6 +224,9 @@ def main():
                     full_file = os.path.join(args.scratch, f)
                     shutil.copy(full_file, target_dir)
                     os.remove(full_file)
+
+        if os.path.exists(args.scratch):
+            shutil.rmtree(args.scratch)
 
 
 if __name__ == "__main__":

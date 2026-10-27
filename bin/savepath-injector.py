@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import argparse
+import os
 import os.path
 import re
 import subprocess
@@ -51,7 +52,7 @@ def _main():
         system = utils.get_ra_system_from_path(config_path)
         if not args.config_file:
             args.config_file = os.path.join(
-                args.work_dir, f"ra_save_override_{system}.cfg"
+                args.work_dir, f"ra_save_override_{system}_{os.getpid()}.cfg"
             )
         save_dir = os.path.join(args.root_save_dir, system)
         _write_config(args.config_file, save_dir)
