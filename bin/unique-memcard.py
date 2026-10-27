@@ -20,8 +20,15 @@ def _verify_no_cards(memcards):
 
 def _setup_card_links(romfile, memcards, savedir):
     base, _ = os.path.splitext(os.path.basename(romfile))
+    os.makedirs(savedir, exist_ok=True)
     for m, l in memcards:
         save_path = os.path.join(savedir, f"{base}.{l}")
+        # HARDENING SAFEGUARD: Initialize an empty card file if this is a first
+        # boot.  This makes sure the symlink points to a valid file instantly,
+        # preventing emulator path validation crashes.
+        if not os.path.exists(save_path):
+            with open(save_path, "w", encoding="utf-8") as touch_file:
+                pass
         os.symlink(save_path, m)
 
 

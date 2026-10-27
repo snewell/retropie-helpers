@@ -60,6 +60,8 @@ def _main():
         must_clean = True
 
     try:
+        # make sure the directory exists
+        os.makedirs(save_dir, exist_ok=True)
         subprocess.run(args.args, check=True)
     finally:
         if must_clean:
