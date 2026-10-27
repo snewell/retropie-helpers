@@ -46,9 +46,6 @@ def main():
         "-m", "--memcard8-path", help="Explicit path to emulator's 8MB memory card"
     )
     parser.add_argument(
-        "-M", "--memcard32-path", help="Explicit path to emulator's 32MB memory card"
-    )
-    parser.add_argument(
         "-s",
         "--save-dir",
         help="Path for per-game memory cards (defaults to content directory)",
@@ -58,12 +55,6 @@ def main():
         "--srm8-extension",
         help="Extension for an 8MB per-game memory card",
         default="srm8",
-    )
-    parser.add_argument(
-        "-E",
-        "--srm32-extension",
-        help="Extension for an 32MB per-game memory card",
-        default="srm32",
     )
     parser.add_argument(
         "args",
@@ -76,14 +67,9 @@ def main():
         args.save_dir = rom_dir
     if args.memcard8_path is None:
         args.memcard8_path = os.path.join(rom_dir, _DEFAULT_CARD_DIR, _SHARED_MEMCARD8)
-    if args.memcard32_path is None:
-        args.memcard32_path = os.path.join(
-            rom_dir, _DEFAULT_CARD_DIR, _SHARED_MEMCARD32
-        )
 
     memcards = [
         (args.memcard8_path, args.srm8_extension),
-        (args.memcard32_path, args.srm32_extension),
     ]
     _verify_no_cards(memcards)
     _setup_card_links(args.filename, memcards, args.save_dir)
