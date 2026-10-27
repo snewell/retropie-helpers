@@ -14,6 +14,7 @@ def _mount(game_file, mount_dir):
     subprocess.run(
         [
             "fuseiso",
+            "-p",  # create/remove mount point automatically
             game_file,
             mount_dir,
         ],
@@ -84,6 +85,8 @@ def _main():
     args = parser.parse_args()
     if args.mount_point is None:
         args.mount_point = _DEFAULT_MOUNT_POINT
+    args.mount_point = os.path.join(args.mount_point, str(os.getpid()))
+
     args.filename, args.args = utils.get_filename_and_args(args.filename, args.args)
     run_fn = _setup_game(args.filename, args.mount_point)
     if args.args:
