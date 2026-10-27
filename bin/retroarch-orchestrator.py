@@ -7,6 +7,7 @@ import utils
 
 _BASE_ROM_PATH = "/home/pi/RetroPie/roms"
 
+
 def _get_rom_path(args):
     for a in args:
         if a.startswith(_BASE_ROM_PATH):
@@ -91,7 +92,6 @@ def _main():
         )
     # add actual command
     final_command.extend(args.args)
-    # print(f"{final_command}")
     subprocess.run(final_command, check=True)
 
 
