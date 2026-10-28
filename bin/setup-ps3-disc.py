@@ -54,12 +54,13 @@ def _setup_game(game_path, mount_dir):
         return lambda run_fn: run_fn(_make_game_path(game_path))
     if os.path.islink(game_path):
         # it's a link, so recurse
+        target = os.readlink(game_path)
         if not os.path.isabs(target):
             # Reconstruct the true absolute destination relative to the link's home folder
             target = os.path.normpath(os.path.join(os.path.dirname(game_path), target))
 
         return _setup_game(os.readlink(game_path), mount_dir)
-    raise RuntimeError("Unepxected type of file")
+    raise RuntimeError("Unexpected type of file")
 
 
 def _make_execute_fn(args, original_path):
