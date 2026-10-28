@@ -1,0 +1,75 @@
+#!/bin/bash
+# libexec/rph-wrapper.sh (Explicit Argument Passing Edition)
+set -euo pipefail
+
+INFO_FILE=/dev/shm/runcommand.info
+LIBEXEC_DIR="$(dirname "${0}")"
+
+TARGET_LAUNCHER="rph-launch-${1}"
+shift
+
+if [ "${1}" = "--help" ]; then
+    exec "${LIBEXEC_DIR}/${TARGET_LAUNCHER}" --help
+fi
+
+# 1. Gather telemetry data at the absolute front gate
+if [ -e "${INFO_FILE}" ]; then
+    SYSTEM=$(sed '1q;d' "${INFO_FILE}")
+    EMULATOR_ID=$(sed '2q;d' "${INFO_FILE}")
+    ROM=$(sed '3q;d' "${INFO_FILE}")
+else
+    echo "Failed to gather information about running rom" >&2
+    # TODO: try to figure it out via CLI
+    exit 1
+fi
+EMULATOR_ID="${EMULATOR_ID:-unknown}"
+
+# 2. Match local data profile configuration shards
+DATA_PROFILE="${LIBEXEC_DIR}/${TARGET_LAUNCHER}.data"
+if [ -f "${DATA_PROFILE}" ]; then
+    source "${DATA_PROFILE}"
+else
+    echo "No data file available for ${TARGET_LAUNCHER} (expected ${DATA_PROFILE})" >&2
+    exit 1
+fi
+
+ORCHESTRATOR_BREAK_GLASS="false"
+ORCHESTRATOR_DEBUG=""
+declare -a EMULATOR_OVERRIDE_CMD=()
+
+# 3. Parse customizable .rc layout scripts
+if [ -f "${RC_FILE}" ]; then
+    source "${RC_FILE}"
+fi
+
+# 4. Break-Glass Emergency Overrides
+if [ "${ORCHESTRATOR_BREAK_GLASS}" = "true" ]; then
+    if [ ${#EMULATOR_OVERRIDE_CMD[@]} -eq 0 ]; then
+        echo "Error: ORCHESTRATOR_BREAK_GLASS is true but EMULATOR_OVERRIDE_CMD is empty!" >&2
+        exit 1
+    fi
+    exec "${EMULATOR_OVERRIDE_CMD[@]}"
+fi
+
+# 5. Build dynamic orchestration array payload block
+orch_payload=("${orch_args[@]}")
+for array_name in "${!tool_map[@]}"; do
+    target_flag="${tool_map[${array_name}]}"
+    indirect_reference="${array_name}[@]"
+    array_values=("${!indirect_reference}")
+    if [ ${#array_values[@]} -gt 0 ]; then
+        for item in "${array_values[@]}"; do
+            orch_payload+=("${target_flag}=${item}")
+        done
+    fi
+done
+
+# -----------------------------------------------------------------------------
+# THE DETERMINISTIC EXTRACTION IMPROVEMENT:
+# We feed --rom and --system as explicit, core switches directly to the launcher.
+# -----------------------------------------------------------------------------
+exec "${LIBEXEC_DIR}/${TARGET_LAUNCHER}" \
+    --rom "${ROM}" \
+    --system "${SYSTEM}" \
+    "${orch_payload[@]}" \
+    -- "${@}"

@@ -1,0 +1,35 @@
+#!/bin/bash
+# rph - subcommand router
+
+set -euo pipefail
+
+my_location=$(realpath "${BASH_SOURCE[0]}")
+LIBEXEC_DIR="$(dirname "${my_location}")/../libexec"
+
+usage() {
+    echo "Usage: rph <subcommand> [args...]" >&2
+    exit 1
+}
+
+if [ $# -lt 1 ]; then
+    usage
+fi
+
+SUBCOMMAND="${1}"
+shift
+
+# SANITY CHECK: Ensure the subcommand strictly conforms to safe alphanumeric names.
+# This prevents directory traversals, spaces, or script injections.
+if [[ ! "${SUBCOMMAND}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+    echo "Security Error: Malformed subcommand name detected." >&2
+    exit 1
+fi
+
+TARGET_EXE="${LIBEXEC_DIR}/rph-${SUBCOMMAND}"
+
+if [ -x "${TARGET_EXE}" ]; then
+    exec "${TARGET_EXE}" "${@}"
+else
+    echo "Error: Unknown subcommand 'rph ${SUBCOMMAND}'" >&2
+    usage
+fi

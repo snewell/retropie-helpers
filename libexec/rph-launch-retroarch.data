@@ -1,0 +1,12 @@
+# File location: libexec/rph-launch-retroarch.data
+RC_FILE=~/.rph.d/retroarch.rc
+
+# Register ONLY the variable key matrices valid for a retroarch pipeline
+declare -A tool_map
+tool_map[spi_args]="--savepath-injector-arg"
+tool_map[xdp_args]="--xdelta-patcher-arg"
+
+# Declare the variables so the .rc script can populate them natively
+spi_args=()
+xdp_args=()
+orch_args=()
