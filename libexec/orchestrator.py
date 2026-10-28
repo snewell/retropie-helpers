@@ -6,9 +6,11 @@ import os
 
 _XDELTA_DEFAULT_SYSTEMS = [
     "dreamcast",
+    "gc",
     "ps2",
-    "psx",
     "psp",
+    "psx",
+    "wii",
 ]
 
 class EmulatorOrchestrator:
