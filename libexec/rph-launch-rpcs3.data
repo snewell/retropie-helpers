@@ -1,0 +1,13 @@
+# File location: libexec/rph-launch-rpcs3.data
+# Explicitly separates your emulator profile targets
+RC_FILE=~/.rph.d/rpcs3.rc
+
+# Register ONLY the variable key matrices valid for a rpcs3 pipeline
+declare -A tool_map
+tool_map[sp3d_args]="--setup-ps3-disc-arg"
+tool_map[rpcs3_args]="--emu-arg"
+
+# Declare the variables so the .rc script can populate them natively
+sp3d_args=()
+rpcs3_args=()
+orch_args=()

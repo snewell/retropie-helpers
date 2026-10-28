@@ -77,7 +77,6 @@ def main():
     try:
         if args.args:
             # everything is patched, execute
-            args.args.append(args.filename)
             subprocess.run(args.args, check=True)
     finally:
         for m, _ in memcards:

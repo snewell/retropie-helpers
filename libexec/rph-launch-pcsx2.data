@@ -1,0 +1,15 @@
+# File location: libexec/rph-launch-pcsx2.data
+# Explicitly separates your emulator profile targets
+RC_FILE=~/.rph.d/pcsx2.rc
+
+# Register ONLY the variable key matrices valid for a PlayStation 2 pipeline
+declare -A tool_map
+tool_map[umc_args]="--unique-memcard-arg"
+tool_map[xdp_args]="--xdelta-patcher-arg"
+tool_map[pcsx2_args]="--emu-arg"
+
+# Declare the variables so the .rc script can populate them natively
+umc_args=()
+xdp_args=()
+pcsx2_args=()
+orch_args=()
