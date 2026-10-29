@@ -5,54 +5,72 @@ retropie-helpers
 .. image:: https://shields.io
    :target: https://github.com
 
-A collection of lightweight, zero-dependency process wrappers designed to transform a standard retropie_ emulation setup into a clean, automated, and thread-safe pipeline.
+A collection of lightweight, zero-dependency process wrappers designed to
+transform a standard retropie_ emulation setup into a clean, automated, and
+thread-safe pipeline.
 
 What This Solves
 ----------------
-* **Clean ROM Folders:** Forces save data and states into isolated per-system directories out of your high-value game folders, making nightly backups effortless.
-* **On-The-Fly Rom Patching:** Automatically applies standalone translation or hack `.xdelta` patches inside isolated, zero-wear RAM memory spaces (`tmpfs`) right when a game boots, keeping your original ROM dump file untouched.
-* **Insulated State Isolation:** Solves global file locks on emulators like PCSX2 and RPCS3, cleanly wrapping memory cards and virtual optical disc images inside unique Process-ID sub-folders that drop automatically when you exit the game.
+* **Clean ROM Folders**: Forces save data into isolated per-system directories
+  out of your game folders, making nightly backups effortless.
+* **On-The-Fly Rom Patching**: Automatically applies standalone translation or
+  hack :code:`.xdelta` patches inside isolated, zero-wear RAM memory spaces
+  (:code:`tmpfs`) just before a game boots, keeping original ROM files
+  untouched and ready for future patch versions.
+* **Automatic Mounting of PS3 Discs**: Instead of maintaining PS3 discs as
+  folders, mounts them on the fly (without root permissions) and passes the
+  appropriate path to RPCS3--you can treat a PS3 dump identically to games from
+  any other system.
 
 Quick Start
 -----------
-Because RetroPie hardcodes absolute paths to its internal emulator binaries, this framework hooks directly in front of the engine execution sequence via a transparent binary swap. 
-
-To globally deploy the pipeline across **all standard system cores with zero configuration changes**, run this command with root privileges:
+To globally deploy the pipeline across **all standard system cores with zero
+configuration changes**, clone this repo and run the install script.
 
 .. code:: bash
 
-   curl -sSL https://githubusercontent.com | sudo bash
+   $ git clone https://github.com/snewell/retropie-helpers
+   $ cd retropie-helpers
+   $ ./install.sh
 
-How It Works (Invisible Interception)
--------------------------------------
-The automated script safely moves RetroPie's hardcoded execution binary from ``/opt/retropie/emulators/retroarch/bin/retroarch`` to a fallback file named ``retroarch.real``. It then drops our master wrapper script into the original path location.
+This will install :code:`rph` into user space and set up hooks into any
+installed emulators we can detect in the retropie configuration.
 
-When a game is launched (NES, SNES, Genesis, PSX, etc.), RetroPie targets the absolute path exactly as it always does. Our wrapper intercepts the call, sets up your clean save paths and patches dynamically, and drops execution down to the true backend compiler without any performance impact or interface adjustments.
+How It Works (retroarch)
+------------------------
+A thin wrapper replaces :code:`retroarch` (used by most systems) and passes
+control into the :code:`rph` pipeline.  That builds and executes a command
+chain that applies all your settings, customizable per core, system, rom, or
+anything else you want (configuration is controlled via :code:`bash`--if you
+can code it, it's possible).
 
-Standalone Exceptions (Dolphin, PCSX2, RPCS3)
----------------------------------------------
-Non-libretro standalone emulators (such as GameCube, Wii, PS2, and PS3) bypass the global RetroArch binary directory and require an explicit launch helper entry inside their respective configuration files.
-
-To route them, open the system's emulator config and prefix the command directly with your chosen helper script name:
+How it Works (Dolphin, PCSX2, RPCS3)
+------------------------------------
+Standalone emulators can use the same pipeline with custom entries in
+:code:`emulators.cfg`.  The same wrapper trick from :code:`retroarch` would
+work, but it's more hassle to maintain since standalone emulators tend to
+update more frequently.
 
 .. code:: ini
 
-   # File location: /opt/retropie/configs/ps2/emulators.cfg
-   # Original Entry: flatpak run net.pcsx2.PCSX2 -fullscreen %ROM%
-   
-   # Hardened Composed Entry:
-   unique-pcsx2 = "launch-pcsx2.sh %ROM%"
-   default = "unique-pcsx2"
+   # File location: /opt/retropie/configs/gc/emulators.cfg
+   dolphin = "/opt/retropie/emulators/dolphin/bin/dolphin-emu-nogui -e %ROM%"
+   dolphin-gui = "/opt/retropie/emulators/dolphin/bin/dolphin-emu -b -e %ROM%"
+   rph-orchestrated-dolphin = "rph launch dolphin /opt/retropie/emulators/dolphin/bin/dolphin-emu -b -e %ROM%"
+   default = "rph-orchestrated-dolphin"
+
 
 Configuration & Upkeep
 ----------------------
-A human-readable runtime rules engine is instantiated inside your home workspace at ``~/.retropie-helpers.d/ra-orchestrator.rc``. 
-
-This file is a standard, fully executable Bash shell script block. You can open it inside any text editor to drop custom edge cases, profile paths, or system exclusions on the fly without ever touching the core utility files. 
+Human-readable runtime rules are instantiated inside your home directory at
+:code:`~/.rph.d/`.  Any non-default options simply require setting a handful of
+variables specific to each emulator's toolchain.
 
 Architecture & Deep Dives
 -------------------------
-Please check out our detailed technical breakdown sheets inside the local ``/docs`` directory for deep explanations regarding argument array tokenization, FUSE isolation, and custom multi-user tracking layouts.
+More information is in the docs folder.  It explains how things work under the
+hood in more detail for those who are curious, as well as manual installation
+steps if you want to customize the install.
 
 .. _retropie: https://retropie.org.uk
 
