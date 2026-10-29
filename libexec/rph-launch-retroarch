@@ -1,0 +1,17 @@
+#!/usr/bin/python3
+
+from orchestrator import EmulatorOrchestrator
+
+
+def main():
+    # Insulated strictly to optical disk manipulation requirements
+    (
+        EmulatorOrchestrator("rph-launch-retroarch", "retroarch orchestration pipeline")
+        .add_feature("savepath_injector")
+        .add_feature("xdelta_patcher")
+        .parse_and_execute()
+    )
+
+
+if __name__ == "__main__":
+    main()
