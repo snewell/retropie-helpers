@@ -1,0 +1,6 @@
+# -----------------------------------------------------------------------------
+# GLOBAL CONSTANTS: Define shared environment variables here so they flow
+# consistently across all downstream subtool argument slots.
+# -----------------------------------------------------------------------------
+ROOT_SAVE_PATH="${HOME}/saves"
+GLOBAL_SCRATCH_PAD="/mnt/scratch"

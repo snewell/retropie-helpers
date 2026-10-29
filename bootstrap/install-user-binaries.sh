@@ -22,8 +22,11 @@ fi
 
 echo "-> Deploying user-facing configuration files..."
 for f in "${MY_DIR}/../conf/"*; do
-    if  [ ! -f "${f}" ]; then
+    if  [ ! -f "${TARGET_CONF}/$(basename ${f})" ]; then
+        echo "   ...insatlling ${f}"
         cp "${f}" "${TARGET_CONF}/"
+    else
+        echo "   ...skipping ${f}"
     fi
 done
 
@@ -35,5 +38,5 @@ if [ ! grep -q 'HOME/bin' "${PROFILE_FILE}" 2>/dev/null ]; then
     echo -e "\n# Added by retropie-helpers bootstrap\nexport PATH=\"\$PATH:\$HOME/bin\"" >> "${PROFILE_FILE}"
     echo "✓ Added ~/bin to your path in ${PROFILE_FILE}."
 else
-    echo "PATH set in ${PROFILE_FILE}"
+    echo "PATH already set in ${PROFILE_FILE}"
 fi

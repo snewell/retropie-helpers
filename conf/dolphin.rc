@@ -1,0 +1,10 @@
+# The version of systemd that ships on Ubuntu 24.04 has a bug
+# (https://github.com/systemd/systemd/issues/35288) that causes random dolphin
+# crashes.  If you have a manual build of a working version, you can inject it
+# just into dolphin without impacting your system as a whole.
+
+WORKING_SYSTEMD_DIR="/home/pi/systemd/systemd-260.1/build"
+
+if [ -d "${WORKING_SYSTEMD_DIR}" ]; then
+	export LD_LIBRARY_PATH="${WORKING_SYSTEMD_DIR}"
+fi

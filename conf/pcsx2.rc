@@ -1,0 +1,24 @@
+# ==============================================================================
+# ~/.rph.d/pcsx2.rc
+# Custom profile rules engine for the standalone PCSX2 execution loop.
+# ==============================================================================
+
+# Common things like our root save folder and scratch dir
+[ -e ~/.rph.d/common.rc ] && source ~/.rph.d/common.rc
+
+# 1. Forward the unique-memcard path down to Slot 1 dynamically
+umc_args+=(
+    --save-dir "${ROOT_SAVE_PATH}/ps2"
+)
+
+# 2. Configure default structural arguments for the standalone PCSX2 player
+pcsx2_args+=(
+    -fullscreen
+)
+
+# -----------------------------------------------------------------------------
+# ADVANCED DEBUGGING TOGGLE
+# -----------------------------------------------------------------------------
+# Toggle this string to "verbose" to force rph-launch to print out your complete
+# array matrix transformations directly to the system log terminal logs.
+# ORCHESTRATOR_DEBUG="verbose"

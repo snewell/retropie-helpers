@@ -1,42 +1,56 @@
-# This file is sourced by the retroarch wrapper.  Valid variables to modify are
-# as follows:
-#
-#  - spi_args - an array of arguments that will be passed to the
-#               savepath-injector script
-#  - xdp_args - an array of arguments that will be passed to the xdelta-patcher
-#               script
-#  - orch_args - an array of arguments that will be passed to the orchestrator
-#                script
-#
-# Information variables:
-#
-#  - SYSTEM - the system detected by runcommand (e.g., nes, psp)
-#  - CORE - the retroarch core being used
-#  - ROM - the *full* path to the rom being launched
+# ==============================================================================
+# ~/.rph.d/retroarch.rc
+# Global configuration profile matrix for the retropie-helpers environment.
+# ==============================================================================
 
-# This will force save data to be written to system-specfiic folders outside the
-# rom directory.  This makes backups easier, and makes it simpler to eventually
-# support multiple users on the same physical device.
-#
-# If the system in question has a savepath specified, the savepath-injector
-# script will not override it.
+# Common things like our root save folder and scratch dir
+[ -e ~/.rph.d/common.rc ] && source ~/.rph.d/common.rc
+
+# -----------------------------------------------------------------------------
+# DEFAULT PIPELINE ASSIGNMENTS
+# -----------------------------------------------------------------------------
+# Dynamically point the savepath-injector to your system target folder
 spi_args+=(
-    --save-dir
-    # Saves will be in a per-system folder under this path
-    ~/saves
+    --root-save-dir "${ROOT_SAVE_PATH}"
 )
 
-# If we wanted to use a non-default mount point for the xdelta-patcher, we can
-# do that here.
+# Configure your xdelta patching volatile RAM target workspace
 xdp_args+=(
-    --scratch
-    /mnt/xdelta-patched-games
+    --scratch "${GLOBAL_SCRATCH_PAD}"
 )
 
-# For some reason we don't want to provide xdelta patching for PSP games, so
-# conditionally disable it.
-# if [ "${SYSTEM}" == "psp" ]; then
-#    orch_args+=(
-#        --xdelta-patcher=disable
-#    )
+# -----------------------------------------------------------------------------
+# POWER-USER RECIPIES & CONDITIONAL OVERRIDES
+# You have full access to native Bash logic. Use the explicit runtime parameters
+# populated by the launcher ($SYSTEM, $EMULATOR_ID, $ROM) to handle custom behaviors.
+# -----------------------------------------------------------------------------
+
+# --- Example 1: Isolating a Specific Core ---
+# If a specific core behaves unexpectedly with on-the-fly patching, you can
+# explicitly drop the feature for just that target environment:
+#
+# if [ "${EMULATOR_ID}" == "lr-ppsspp" ]; then
+#     orch_args+=(--xdelta-patcher=disable)
+# fi
+
+
+# --- Example 2: Dynamic Multiplayer/Shared Save Redirects ---
+# You can override paths conditionally based on the game name, making it simple
+# to sync co-op memory cards or separate playthrough states:
+#
+# if [[ "${ROM}" == *"Final Fantasy VII"* ]]; then
+#     spi_args=(--root-save-dir "${ROOT_SAVE_PATH}/coop-saves")
+# fi
+
+
+# --- Example 3: Emergency Pipeline Escape Hatch ---
+# If an upstream update alters an emulator's CLI layout, you can engage the
+# Break-Glass safety rule to bypass automation and execute a raw array string:
+#
+# if [[ "${ROM}" == *"Extreme-Edge-Case-Game"* ]]; then
+#     ORCHESTRATOR_BREAK_GLASS="true"
+#     EMULATOR_OVERRIDE_CMD=(
+#         rph unique-memcard --save-dir "${ROOT_SAVE_PATH}/custom" --
+#         /usr/bin/custom-emu --flags "${ROM}"
+#     )
 # fi
