@@ -1,15 +1,16 @@
 #!/usr/bin/python3
-# File location: libexec/rph-launch-pcsx2
+
 from orchestrator import EmulatorOrchestrator
-import sys
+
 
 def main():
     # We pass the custom mutator function straight into the execution engine
     (
-        EmulatorOrchestrator("rph-launch-dolphin",  "dolphin orchestration pipeline")
-            .add_feature("xdelta_patcher")
-            .parse_and_execute()
+        EmulatorOrchestrator("rph-launch-dolphin", "dolphin orchestration pipeline")
+        .add_feature("xdelta_patcher")
+        .parse_and_execute()
     )
+
 
 if __name__ == "__main__":
     main()

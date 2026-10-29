@@ -13,6 +13,7 @@ _XDELTA_DEFAULT_SYSTEMS = [
     "wii",
 ]
 
+
 class EmulatorOrchestrator:
     def __init__(self, prog_name, description):
         self.prog_name = prog_name
@@ -21,19 +22,35 @@ class EmulatorOrchestrator:
         self._parser = argparse.ArgumentParser(prog=prog_name, description=description)
 
         # 1. CORE TELEMETRY: Explicitly pass system parameters downstream
-        self._parser.add_argument("--rom", required=True, help="Absolute path to the target game file")
-        self._parser.add_argument("--system", required=True, help="The internal system tag name (e.g. snes, ps2)")
-        self._parser.add_argument("--dry-run", action="store_true", help="Print the final execution pipeline without executing it (useful for debugging)")
+        self._parser.add_argument(
+            "--rom", required=True, help="Absolute path to the target game file"
+        )
+        self._parser.add_argument(
+            "--system",
+            required=True,
+            help="The internal system tag name (e.g. snes, ps2)",
+        )
+        self._parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            help="Print the final execution pipeline without executing it (useful for debugging)",
+        )
 
         # 2. FEATURE REGISTRATION HOOKS
-        self._parser.add_argument("--emu-arg", action="append", default=[], dest="emu_args")
+        self._parser.add_argument(
+            "--emu-arg", action="append", default=[], dest="emu_args"
+        )
         self._execution_pipeline = []
         self.libexec_path = os.path.dirname(os.path.abspath(__file__))
 
-    def add_feature(self, feature_name, choices=("auto", "force", "disable"), default="auto"):
+    def add_feature(
+        self, feature_name, choices=("auto", "force", "disable"), default="auto"
+    ):
         flag_name = f"--{feature_name.replace('_', '-')}"
         self._parser.add_argument(flag_name, choices=choices, default=default)
-        self._parser.add_argument(f"{flag_name}-arg", action="append", default=[], dest=f"{feature_name}_arg")
+        self._parser.add_argument(
+            f"{flag_name}-arg", action="append", default=[], dest=f"{feature_name}_arg"
+        )
 
         self._execution_pipeline.append(feature_name)
         return self
@@ -42,7 +59,9 @@ class EmulatorOrchestrator:
     # DECIDED EXPLICIT FEATURE HANDLERS
     # -------------------------------------------------------------------------
     def _handle_unique_memcard(self, args, final_command):
-        if args.unique_memcard != "disable" and (args.unique_memcard_arg or args.unique_memcard == "force"):
+        if args.unique_memcard != "disable" and (
+            args.unique_memcard_arg or args.unique_memcard == "force"
+        ):
             exe = os.path.join(self.libexec_path, "rph-unique-memcard")
             # We can now forward --rom down cleanly to sub-tools if needed!
             final_command.extend([exe, "-f", args.rom, *args.unique_memcard_arg, "--"])
@@ -57,10 +76,14 @@ class EmulatorOrchestrator:
             if args.xdelta_patcher == "force" or args.system in _XDELTA_DEFAULT_SYSTEMS:
                 exe = os.path.join(self.libexec_path, "rph-xdelta-patcher")
                 # Uses the pristine, explicit args.rom string parameter natively!
-                final_command.extend([exe, "-f", args.rom, *args.xdelta_patcher_arg, "--"])
+                final_command.extend(
+                    [exe, "-f", args.rom, *args.xdelta_patcher_arg, "--"]
+                )
 
     def _handle_setup_ps3_disc(self, args, final_command):
-        if args.setup_ps3_disc != "disable" and (args.setup_ps3_disc_arg or args.setup_ps3_disc == "force"):
+        if args.setup_ps3_disc != "disable" and (
+            args.setup_ps3_disc_arg or args.setup_ps3_disc == "force"
+        ):
             exe = os.path.join(self.libexec_path, "rph-setup-ps3-disc")
             final_command.extend([exe, "-f", args.rom, *args.setup_ps3_disc_arg, "--"])
 

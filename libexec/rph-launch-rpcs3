@@ -1,13 +1,16 @@
 #!/usr/bin/python3
+
 from orchestrator import EmulatorOrchestrator
+
 
 def main():
     # Insulated strictly to optical disk manipulation requirements
     (
         EmulatorOrchestrator("rph-launch-rpcs3", "pcsx2 orchestration pipeline")
-            .add_feature("setup_ps3_disc")
-            .parse_and_execute()
+        .add_feature("setup_ps3_disc")
+        .parse_and_execute()
     )
+
 
 if __name__ == "__main__":
     main()

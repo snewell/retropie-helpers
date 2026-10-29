@@ -57,7 +57,7 @@ def _setup_game(game_path, mount_dir):
         target = os.readlink(game_path)
         if not os.path.isabs(target):
             # Reconstruct the true absolute destination relative to the link's home folder
-            target = os.path.normpath(os.path.join(os.path.dirname(game_path), target))
+            target = os.path.normpath(os.path.join(os.path.dirname(target), target))
 
         return _setup_game(os.readlink(game_path), mount_dir)
     raise RuntimeError("Unexpected type of file")
