@@ -59,9 +59,7 @@ class EmulatorOrchestrator:
     # DECIDED EXPLICIT FEATURE HANDLERS
     # -------------------------------------------------------------------------
     def _handle_unique_memcard(self, args, final_command):
-        if args.unique_memcard != "disable" and (
-            args.unique_memcard_arg or args.unique_memcard == "force"
-        ):
+        if args.unique_memcard != "disable":
             exe = os.path.join(self.libexec_path, "rph-unique-memcard")
             # We can now forward --rom down cleanly to sub-tools if needed!
             final_command.extend([exe, "-f", args.rom, *args.unique_memcard_arg, "--"])
@@ -81,9 +79,7 @@ class EmulatorOrchestrator:
                 )
 
     def _handle_setup_ps3_disc(self, args, final_command):
-        if args.setup_ps3_disc != "disable" and (
-            args.setup_ps3_disc_arg or args.setup_ps3_disc == "force"
-        ):
+        if args.setup_ps3_disc != "disable":
             exe = os.path.join(self.libexec_path, "rph-setup-ps3-disc")
             final_command.extend([exe, "-f", args.rom, *args.setup_ps3_disc_arg, "--"])
 
