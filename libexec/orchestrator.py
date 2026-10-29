@@ -13,6 +13,18 @@ _XDELTA_DEFAULT_SYSTEMS = [
     "wii",
 ]
 
+_FEATURE_CHOICE_AUTO = "auto"
+_FEATURE_CHOICE_DISABLE = "disable"
+_FEATURE_CHOICE_FORCE = "force"
+
+_FEATURE_CHOICES = (
+    _FEATURE_CHOICE_AUTO,
+    _FEATURE_CHOICE_DISABLE,
+    _FEATURE_CHOICE_FORCE,
+)
+
+_DEFAULT_FEATURE = _FEATURE_CHOICE_AUTO
+
 
 class EmulatorOrchestrator:
     def __init__(self, prog_name, description):
@@ -38,13 +50,17 @@ class EmulatorOrchestrator:
 
         # 2. FEATURE REGISTRATION HOOKS
         self._parser.add_argument(
-            "--emu-arg", action="append", default=[], dest="emu_args"
+            "--emu-arg",
+            action="append",
+            default=[],
+            dest="emu_args",
+            help="Extra arguments to pass to the emulator",
         )
         self._execution_pipeline = []
         self.libexec_path = os.path.dirname(os.path.abspath(__file__))
 
     def add_feature(
-        self, feature_name, choices=("auto", "force", "disable"), default="auto"
+        self, feature_name, choices=_FEATURE_CHOICES, default=_FEATURE_CHOICE_AUTO
     ):
         flag_name = f"--{feature_name.replace('_', '-')}"
         self._parser.add_argument(flag_name, choices=choices, default=default)
@@ -59,19 +75,22 @@ class EmulatorOrchestrator:
     # DECIDED EXPLICIT FEATURE HANDLERS
     # -------------------------------------------------------------------------
     def _handle_unique_memcard(self, args, final_command):
-        if args.unique_memcard != "disable":
+        if args.unique_memcard != _FEATURE_CHOICE_DISABLE:
             exe = os.path.join(self.libexec_path, "rph-unique-memcard")
             # We can now forward --rom down cleanly to sub-tools if needed!
             final_command.extend([exe, "-f", args.rom, *args.unique_memcard_arg, "--"])
 
     def _handle_savepath_injector(self, args, final_command):
-        if args.savepath_injector != "disable":
+        if args.savepath_injector != _FEATURE_CHOICE_DISABLE:
             exe = os.path.join(self.libexec_path, "rph-savepath-injector")
             final_command.extend([exe, *args.savepath_injector_arg, "--"])
 
     def _handle_xdelta_patcher(self, args, final_command):
-        if args.xdelta_patcher != "disable":
-            if args.xdelta_patcher == "force" or args.system in _XDELTA_DEFAULT_SYSTEMS:
+        if args.xdelta_patcher != _FEATURE_CHOICE_DISABLE:
+            if (
+                args.xdelta_patcher == _FEATURE_CHOICE_FORCE
+                or args.system in _XDELTA_DEFAULT_SYSTEMS
+            ):
                 exe = os.path.join(self.libexec_path, "rph-xdelta-patcher")
                 # Uses the pristine, explicit args.rom string parameter natively!
                 final_command.extend(
@@ -79,7 +98,7 @@ class EmulatorOrchestrator:
                 )
 
     def _handle_setup_ps3_disc(self, args, final_command):
-        if args.setup_ps3_disc != "disable":
+        if args.setup_ps3_disc != _FEATURE_CHOICE_DISABLE:
             exe = os.path.join(self.libexec_path, "rph-setup-ps3-disc")
             final_command.extend([exe, "-f", args.rom, *args.setup_ps3_disc_arg, "--"])
 
