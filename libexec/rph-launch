@@ -5,7 +5,8 @@ set -euo pipefail
 INFO_FILE=/dev/shm/runcommand.info
 LIBEXEC_DIR="$(dirname "${0}")"
 
-TARGET_LAUNCHER="rph-launch-${1}"
+RPH_EMULATOR_ID="${1}"
+TARGET_LAUNCHER="rph-launch-${RPH_EMULATOR_ID}"
 shift
 
 if [ "${1}" = "--help" ]; then
@@ -25,7 +26,7 @@ fi
 EMULATOR_ID="${EMULATOR_ID:-unknown}"
 
 # 2. Match local data profile configuration shards
-DATA_PROFILE="${LIBEXEC_DIR}/${TARGET_LAUNCHER}.data"
+DATA_PROFILE="${LIBEXEC_DIR}/../share/rph-pipeline-data/${RPH_EMULATOR_ID}.data"
 if [ -f "${DATA_PROFILE}" ]; then
     source "${DATA_PROFILE}"
 else
