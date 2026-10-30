@@ -5,11 +5,18 @@ set -euo pipefail
 INFO_FILE=/dev/shm/runcommand.info
 LIBEXEC_DIR="$(dirname "${0}")"
 
-TARGET_LAUNCHER="rph-launch-${1}"
+RPH_EMULATOR_ID="${1}"
+TARGET_LAUNCHER="rph-launch-${RPH_EMULATOR_ID}"
 shift
 
 if [ "${1}" = "--help" ]; then
     exec "${LIBEXEC_DIR}/${TARGET_LAUNCHER}" --help
+fi
+
+dry_run=""
+if [ "${1}" = "--dry-run" ]; then
+    dry_run="--dry-run"
+    shift
 fi
 
 # 1. Gather telemetry data at the absolute front gate
@@ -25,7 +32,7 @@ fi
 EMULATOR_ID="${EMULATOR_ID:-unknown}"
 
 # 2. Match local data profile configuration shards
-DATA_PROFILE="${LIBEXEC_DIR}/${TARGET_LAUNCHER}.data"
+DATA_PROFILE="${LIBEXEC_DIR}/../share/rph-pipeline-data/${RPH_EMULATOR_ID}.data"
 if [ -f "${DATA_PROFILE}" ]; then
     source "${DATA_PROFILE}"
 else
@@ -52,7 +59,10 @@ if [ "${ORCHESTRATOR_BREAK_GLASS}" = "true" ]; then
 fi
 
 # 5. Build dynamic orchestration array payload block
-orch_payload=("${orch_args[@]}")
+orch_payload=(
+    "${orch_args[@]}"
+    ${dry_run} # not quoted on purpose
+)
 for array_name in "${!tool_map[@]}"; do
     target_flag="${tool_map[${array_name}]}"
     indirect_reference="${array_name}[@]"
