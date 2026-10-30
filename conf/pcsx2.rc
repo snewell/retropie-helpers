@@ -5,6 +5,8 @@
 
 # Common things like our root save folder and scratch dir
 [ -e ~/.rph.d/common.rc ] && source ~/.rph.d/common.rc
+# use the same xdelta-patcher settings
+[ -e ~/.rph.d/xdp.rc ] && source ~/.rph.d/xdp.rc
 
 # 1. Forward the unique-memcard path down to Slot 1 dynamically
 umc_args+=(

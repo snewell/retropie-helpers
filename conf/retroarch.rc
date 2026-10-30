@@ -6,17 +6,15 @@
 # Common things like our root save folder and scratch dir
 [ -e ~/.rph.d/common.rc ] && source ~/.rph.d/common.rc
 
+# Since multiple emulators use xdelta-patcher, we can put that in a common place as well
+[ -e ~/.rph.d/xdp.rc ] && source ~/.rph.d/xdp.rc
+
 # -----------------------------------------------------------------------------
 # DEFAULT PIPELINE ASSIGNMENTS
 # -----------------------------------------------------------------------------
 # Dynamically point the savepath-injector to your system target folder
 spi_args+=(
     --root-save-dir "${ROOT_SAVE_PATH}"
-)
-
-# Configure your xdelta patching volatile RAM target workspace
-xdp_args+=(
-    --scratch "${GLOBAL_SCRATCH_PAD}"
 )
 
 # -----------------------------------------------------------------------------

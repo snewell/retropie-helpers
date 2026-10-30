@@ -1,0 +1,14 @@
+which fuseiso &>/dev/null
+if [ ${?} -eq 0 ]; then
+    # Configure your PS3 disc mounting
+    sp3d_args+=(
+        --mount-point "${GLOBAL_SCRATCH_PAD}"
+    )
+else
+    # we don't have fuseiso in PATH, so disable PS3 disc mounting
+    orch_args+=(
+        --setup-ps3-disc disable
+        --xdelta-patcher disable
+    )
+    echo "Disabling setup-ps3-disc (cannot find fuseiso in PATH)" >&2
+fi

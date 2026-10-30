@@ -3,6 +3,9 @@
 # crashes.  If you have a manual build of a working version, you can inject it
 # just into dolphin without impacting your system as a whole.
 
+# use common xdelta-patcher settings
+[ -e ~/.rph.d/xdp.rc ] && source ~/.rph.d/xdp.rc
+
 WORKING_SYSTEMD_DIR="/home/pi/systemd/systemd-260.1/build"
 
 if [ -d "${WORKING_SYSTEMD_DIR}" ]; then
