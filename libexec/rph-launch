@@ -61,12 +61,16 @@ fi
 # 5. Build dynamic orchestration array payload block
 orch_payload=(
     "${orch_args[@]}"
-    ${dry_run} # not quoted on purpose
+    ${dry_run} # not quoted on purpose--empty value means no argument, but quotes would an empty string
 )
+
+# the exclamation point here gets us the key names, so that's what the loop is iterating over
 for array_name in "${!tool_map[@]}"; do
     target_flag="${tool_map[${array_name}]}"
     indirect_reference="${array_name}[@]"
+    # the exclamation mark here runs the indirect reference into a direct reference, so we're duplicating the array set in rc files
     array_values=("${!indirect_reference}")
+    # and now we can iterate over the contents of the array, which are the actual arguments to the tool
     if [ ${#array_values[@]} -gt 0 ]; then
         for item in "${array_values[@]}"; do
             orch_payload+=("${target_flag}=${item}")
