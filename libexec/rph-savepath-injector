@@ -55,13 +55,13 @@ def _main():
                 args.work_dir, f"ra_save_override_{system}_{os.getpid()}.cfg"
             )
         save_dir = os.path.join(args.root_save_dir, system)
+        # make sure the directory exists
+        os.makedirs(save_dir, exist_ok=True)
         _write_config(args.config_file, save_dir)
         args.args.extend(["--appendconfig", args.config_file])
         must_clean = True
 
     try:
-        # make sure the directory exists
-        os.makedirs(save_dir, exist_ok=True)
         subprocess.run(args.args, check=True)
     finally:
         if must_clean:
