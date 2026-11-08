@@ -65,7 +65,11 @@ declare -a EMULATOR_OVERRIDE_CMD=()
 
 # 3. Parse customizable .rc layout scripts
 if [ -f "${RC_FILE}" ]; then
+    # disable eu options since we're jumping into unknown rc files
+    set +eu
     source "${RC_FILE}"
+    # and turn the options back on
+    set -eu
 fi
 
 # 4. Break-Glass Emergency Overrides
