@@ -2,6 +2,22 @@
 # libexec/rph-wrapper.sh (Explicit Argument Passing Edition)
 set -euo pipefail
 
+rph_load_metadata() {
+    local md_file="${ROM%.*}.rphmd"
+    local -n dest_dict="${1}"
+
+    [ ! -f "${md_file}" ] && return 0
+
+    local key value
+    while IFS='=' read -r key value || [[ -n "${key}" ]]; do
+        key=$(echo "${key}" | sed 's/#.*//; s/^[[:space:]]*//; s/[[:space:]]*$//')
+        value=$(echo "${value}" | sed 's/#.*//; s/^[[:space:]]*//; s/[[:space:]]*$//')
+
+        [[ -z "${key}" ]] && continue
+        dest_dict["${key}"]="${value}"
+    done < "${md_file}"
+}
+
 INFO_FILE=/dev/shm/runcommand.info
 LIBEXEC_DIR="$(dirname "${0}")"
 
@@ -30,6 +46,9 @@ else
     exit 1
 fi
 EMULATOR_ID="${EMULATOR_ID:-unknown}"
+
+declare -A rom_metadata
+rph_load_metadata "rom_metadata"
 
 # 2. Match local data profile configuration shards
 DATA_PROFILE="${LIBEXEC_DIR}/../share/rph-pipeline-data/${RPH_EMULATOR_ID}.data"
