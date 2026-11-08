@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 # libexec/orchestrator.py (Explicit Parameter Edition)
 import argparse
-import subprocess
 import os
+import subprocess
+import sys
 
 _XDELTA_DEFAULT_SYSTEMS = [
     "dreamcast",
@@ -85,6 +86,15 @@ class EmulatorOrchestrator:
             exe = os.path.join(self.libexec_path, "rph-savepath-injector")
             final_command.extend([exe, *args.savepath_injector_arg, "--"])
 
+    def _handle_share_retroarch_save(self, args, final_command):
+        if args.share_retroarch_save != _FEATURE_CHOICE_DISABLE:
+            if (
+                args.share_retroarch_save == _FEATURE_CHOICE_FORCE
+                or args.share_retroarch_save_arg
+            ):
+                exe = os.path.join(self.libexec_path, "rph-share-retroarch-save")
+                final_command.extend([exe, *args.share_retroarch_save_arg, "--"])
+
     def _handle_xdelta_patcher(self, args, final_command):
         if args.xdelta_patcher != _FEATURE_CHOICE_DISABLE:
             if (
@@ -110,9 +120,12 @@ class EmulatorOrchestrator:
 
         # Execute our structured feature pipeline in exact registered order
         for feature in self._execution_pipeline:
-            handler = getattr(self, f"_handle_{feature}", None)
+            required_feature = f"_handle_{feature}"
+            handler = getattr(self, required_feature, None)
             if handler:
                 handler(args, final_command)
+            else:
+                print(f"Missing feature {required_feature}", file=sys.stderr)
 
         emulator_payload = args.args
 

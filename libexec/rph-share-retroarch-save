@@ -1,0 +1,92 @@
+#!/usr/bin/python3
+
+import argparse
+import os
+import os.path
+import shutil
+import subprocess
+
+
+def _main():
+    parser = argparse.ArgumentParser(
+        prog="share-retoarch-save",
+        description="Setup and inject a temporary save folder to share retroarch save files",
+    )
+    parser.add_argument(
+        "--work-dir",
+        help="Directory use for scratch work",
+        default="/dev/shm/",
+    )
+    parser.add_argument(
+        "--true-save-dir",
+        help="The directory where the save file should actually live",
+        required=True,
+    )
+    parser.add_argument(
+        "--shared-base-name",
+        help="The base name (no extensions) for shared files",
+        required=True,
+    )
+    parser.add_argument(
+        "--expected-base-name",
+        help="The base name (no extensions) for the game-specific saves",
+        required=True,
+    )
+    parser.add_argument(
+        "--save-extension",
+        help="An extension for a save file",
+        action="append",
+        required=True,
+        default=[],
+    )
+    parser.add_argument(
+        "args",
+        nargs="*",
+    )
+    args = parser.parse_args()
+
+    root_work_dir = os.path.join(args.work_dir, str(os.getpid()))
+    ra_save_dir = os.path.join(root_work_dir, "saves")
+    config_dir = os.path.join(root_work_dir, "conf")
+    save_info = []
+    for e in args.save_extension:
+        save_info.append(
+            (
+                os.path.join(args.true_save_dir, f"{args.shared_base_name}.{e}"),
+                os.path.join(ra_save_dir, f"{args.expected_base_name}.{e}"),
+            )
+        )
+
+    try:
+        os.makedirs(ra_save_dir, exist_ok=True)
+        # copy save files if they exist
+        for si in save_info:
+            if os.path.isfile(si[0]):
+                shutil.copy2(si[0], si[1])
+
+        os.makedirs(config_dir, exist_ok=True)
+        config_path = os.path.join(config_dir, "shared-save.cfg")
+        with open(config_path, "w", encoding="utf-8") as out:
+            out.write(f'savefile_directory = "{ra_save_dir}"\n')
+        args.args.extend(["--appendconfig", config_path])
+        subprocess.run(args.args, check=True)
+
+    finally:
+        # copy files back
+        for si in save_info:
+            if os.path.isfile(si[1]):
+                if os.path.isfile(si[0]):
+                    # only copy if the new file is newer
+                    if os.path.getmtime(si[0]) < os.path.getmtime(si[1]):
+                        shutil.copy2(si[1], si[0])
+                else:
+                    # old file doesn't exist, so copy the new one back unconditioally
+                    shutil.copy2(si[1], si[0])
+
+        # everything is copied back, so clean up our work
+        if os.path.exists(root_work_dir):
+            shutil.rmtree(root_work_dir)
+
+
+if __name__ == "__main__":
+    _main()
