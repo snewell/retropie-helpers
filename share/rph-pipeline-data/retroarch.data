@@ -5,6 +5,7 @@ RC_FILE=~/.rph.d/retroarch.rc
 declare -A tool_map
 tool_map[spi_args]="--savepath-injector-arg"
 tool_map[xdp_args]="--xdelta-patcher-arg"
+tool_map[sras_args]="--share-retroarch-save-arg"
 
 # Declare the variables so the .rc script can populate them natively
 spi_args=()
