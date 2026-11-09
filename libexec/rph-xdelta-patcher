@@ -7,7 +7,7 @@ import os.path
 import shutil
 import subprocess
 
-import utils
+import rph_files
 
 _DEFAULT_SCRATCH = "/mnt/scratch"
 
@@ -78,13 +78,13 @@ def _patch_tracklist_file(filename, scratch, make_extra_symlinks, iterate_fn):
 
 def _patch_cue(filename, scratch, make_extra_symlinks):
     return _patch_tracklist_file(
-        filename, scratch, make_extra_symlinks, utils.iterate_cue_tracks
+        filename, scratch, make_extra_symlinks, rph_files.iterate_cue_tracks
     )
 
 
 def _patch_gdi(filename, scratch, make_extra_symlinks):
     patched, to_clean = _patch_tracklist_file(
-        filename, scratch, make_extra_symlinks, utils.iterate_gdi_tracks
+        filename, scratch, make_extra_symlinks, rph_files.iterate_gdi_tracks
     )
     if patched and make_extra_symlinks:
         # Save data is, unfortunately, not written in a reliable name.  Symlink
@@ -110,7 +110,7 @@ def _patch_m3u(filename, scratch, make_extra_symlinks):
             skipped.extend(to_clean)
         entries.append(os.path.basename(m3u_chunk))
 
-    utils.iterate_m3u_files(filename, _file_cb)
+    rph_files.iterate_m3u_files(filename, _file_cb)
     if patched:
         # something got patched, so make a new m3u
         m3u_path = os.path.join(scratch, os.path.basename(filename))
@@ -181,7 +181,7 @@ def main():
     if args.scratch is None:
         args.scratch = _DEFAULT_SCRATCH
     args.scratch = os.path.join(args.scratch, str(os.getpid()))
-    args.filename, args.args = utils.get_filename_and_args(args.filename, args.args)
+    args.filename, args.args = rph_files.get_filename_and_args(args.filename, args.args)
     os.makedirs(args.scratch, exist_ok=True)
 
     # make sure these are set in case the patching fails; don't fail during cleanup'

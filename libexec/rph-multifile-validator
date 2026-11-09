@@ -5,7 +5,7 @@ import os
 import os.path
 import sys
 
-import utils
+import rph_files
 
 
 def _check_tracklist_file(track_file, iterate_fn):
@@ -24,11 +24,11 @@ def _check_tracklist_file(track_file, iterate_fn):
 
 
 def _check_gdi(filename):
-    return _check_tracklist_file(filename, utils.iterate_gdi_tracks)
+    return _check_tracklist_file(filename, rph_files.iterate_gdi_tracks)
 
 
 def _check_cue(filename):
-    return _check_tracklist_file(filename, utils.iterate_cue_tracks)
+    return _check_tracklist_file(filename, rph_files.iterate_cue_tracks)
 
 
 def _check_m3u(filename):
@@ -45,7 +45,7 @@ def _check_m3u(filename):
             r = _check_file(chunk_path)
             ret.extend(r)
 
-    utils.iterate_m3u_files(filename, _cb)
+    rph_files.iterate_m3u_files(filename, _cb)
     if missing_chunks:
         # print(f"f={filename} mc={missing_chunks}")
         ret.append((filename, missing_chunks))

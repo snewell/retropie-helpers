@@ -4,6 +4,7 @@
 set -euo pipefail
 
 my_location=$(realpath "${BASH_SOURCE[0]}")
+LIB_DIR="$(dirname "${my_location}")/../lib"
 LIBEXEC_DIR="$(dirname "${my_location}")/../libexec"
 
 usage() {
@@ -28,6 +29,9 @@ fi
 TARGET_EXE="${LIBEXEC_DIR}/rph-${SUBCOMMAND}"
 
 if [ -x "${TARGET_EXE}" ]; then
+    # setup PYTHONPATH to include rph's lib
+    set +u
+    export PYTHONPATH="${PYTHONPATH}:${LIB_DIR}"
     exec "${TARGET_EXE}" "${@}"
 else
     echo "Error: Unknown subcommand 'rph ${SUBCOMMAND}'" >&2

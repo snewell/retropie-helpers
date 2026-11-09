@@ -5,7 +5,7 @@ import os.path
 import shutil
 import subprocess
 
-import utils
+import rph_files
 
 
 def _verify_no_cards(memcards):
@@ -51,7 +51,7 @@ def main():
         nargs="*",
     )
     args = parser.parse_args()
-    args.rom, args.args = utils.get_filename_and_args(args.rom, args.args)
+    args.rom, args.args = rph_files.get_filename_and_args(args.rom, args.args)
     rom_dir = os.path.dirname(args.rom)
     if args.save_dir is None:
         args.save_dir = rom_dir

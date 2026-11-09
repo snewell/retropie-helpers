@@ -6,7 +6,7 @@ import os.path
 import re
 import subprocess
 
-import utils
+import rph_files
 
 
 def _needs_save_injector(config_path):
@@ -46,10 +46,10 @@ def _main():
         nargs="*",
     )
     args = parser.parse_args()
-    config_path = utils.get_ra_config_path(args.args)
+    config_path = rph_files.get_ra_config_path(args.args)
     must_clean = False
     if _needs_save_injector(config_path):
-        system = utils.get_ra_system_from_path(config_path)
+        system = rph_files.get_ra_system_from_path(config_path)
         if not args.config_file:
             args.config_file = os.path.join(
                 args.work_dir, f"ra_save_override_{system}_{os.getpid()}.cfg"
