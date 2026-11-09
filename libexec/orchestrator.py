@@ -79,7 +79,7 @@ class EmulatorOrchestrator:
         if args.unique_memcard != _FEATURE_CHOICE_DISABLE:
             exe = os.path.join(self.libexec_path, "rph-unique-memcard")
             # We can now forward --rom down cleanly to sub-tools if needed!
-            final_command.extend([exe, "-f", args.rom, *args.unique_memcard_arg, "--"])
+            final_command.extend([exe, "-r", args.rom, *args.unique_memcard_arg, "--"])
 
     def _handle_savepath_injector(self, args, final_command):
         if args.savepath_injector != _FEATURE_CHOICE_DISABLE:

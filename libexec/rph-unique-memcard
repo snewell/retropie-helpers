@@ -2,34 +2,16 @@
 
 import argparse
 import os.path
+import shutil
 import subprocess
 
 import utils
 
-_SHARED_MEMCARD8 = "Mcd001.ps2"
-_SHARED_MEMCARD32 = "Shared Memory Card (32 MB).ps2"
-
-_DEFAULT_CARD_DIR = "Slot 1"
-
 
 def _verify_no_cards(memcards):
     for mcd in memcards:
-        if os.path.exists(mcd[0]):
-            raise RuntimeError(f"Memory card already exists: {mcd[0]}")
-
-
-def _setup_card_links(romfile, memcards, savedir):
-    base, _ = os.path.splitext(os.path.basename(romfile))
-    os.makedirs(savedir, exist_ok=True)
-    for m, l in memcards:
-        save_path = os.path.join(savedir, f"{base}.{l}")
-        # HARDENING SAFEGUARD: Initialize an empty card file if this is a first
-        # boot.  This makes sure the symlink points to a valid file instantly,
-        # preventing emulator path validation crashes.
-        if not os.path.exists(save_path):
-            with open(save_path, "w", encoding="utf-8") as touch_file:
-                pass
-        os.symlink(save_path, m)
+        if os.path.exists(mcd):
+            raise RuntimeError(f"Memory card already exists: {mcd}")
 
 
 def main():
@@ -38,12 +20,20 @@ def main():
         description="Provide a unique memory card file for each PCSX2 title",
     )
     parser.add_argument(
-        "-f",
-        "--filename",
-        help="File to execute",
+        "-r",
+        "--rom",
+        help="rom being executed",
     )
     parser.add_argument(
-        "-m", "--memcard8-path", help="Explicit path to emulator's 8MB memory card"
+        "-m",
+        "--memcard-path",
+        help="Explicit path to emulator's memory card",
+        required=True,
+    )
+    parser.add_argument(
+        "-c",
+        "--card-name",
+        help="Base name for the persistent memory card",
     )
     parser.add_argument(
         "-s",
@@ -52,35 +42,51 @@ def main():
     )
     parser.add_argument(
         "-e",
-        "--srm8-extension",
-        help="Extension for an 8MB per-game memory card",
-        default="srm8",
+        "--srm-extension",
+        help="Extension for the per-game memory card",
+        default="ps2",
     )
     parser.add_argument(
         "args",
         nargs="*",
     )
     args = parser.parse_args()
-    args.filename, args.args = utils.get_filename_and_args(args.filename, args.args)
-    rom_dir = os.path.dirname(args.filename)
+    args.rom, args.args = utils.get_filename_and_args(args.rom, args.args)
+    rom_dir = os.path.dirname(args.rom)
     if args.save_dir is None:
         args.save_dir = rom_dir
-    if args.memcard8_path is None:
-        args.memcard8_path = os.path.join(rom_dir, _DEFAULT_CARD_DIR, _SHARED_MEMCARD8)
+    if args.card_name is None:
+        base, _ = os.path.splitext(os.path.basename(args.rom))
+        args.card_name = base
 
     memcards = [
-        (args.memcard8_path, args.srm8_extension),
+        args.memcard_path,
     ]
     _verify_no_cards(memcards)
-    _setup_card_links(args.filename, memcards, args.save_dir)
+    save_file = os.path.join(args.save_dir, f"{args.card_name}.{args.srm_extension}")
+
+    print(f"save_file={save_file}")
+    print(f"mp={args.memcard_path}")
+    if os.path.isfile(save_file):
+        shutil.copy2(save_file, args.memcard_path)
 
     try:
-        if args.args:
-            # everything is patched, execute
-            subprocess.run(args.args, check=True)
+        # everything is set up, execute
+        subprocess.run(args.args, check=True)
     finally:
-        for m, _ in memcards:
-            os.remove(m)
+        # copy files back
+        if os.path.isfile(args.memcard_path):
+            if os.path.isfile(save_file):
+                # only copy if the new file is newer
+                if os.path.getmtime(save_file) < os.path.getmtime(args.memcard_path):
+                    shutil.copy2(args.memcard_path, save_file)
+            else:
+                # old file doesn't exist, so copy the new one back unconditioally
+                shutil.copy2(args.memcard_path, save_file)
+
+        for m in memcards:
+            if os.path.isfile(m):
+                os.remove(m)
 
 
 if __name__ == "__main__":
