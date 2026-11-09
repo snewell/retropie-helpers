@@ -1,5 +1,6 @@
 import pathlib
 import re
+import shlex
 
 
 def _iterate_tracklist_file(filename, pattern, track_cb):
@@ -10,23 +11,34 @@ def _iterate_tracklist_file(filename, pattern, track_cb):
                 track_cb(m.group(1))
 
 
-_CUE_FILE_PATTERN = re.compile(r'^FILE\s+"(.*)"')
+_CUE_FILE_PATTERN = re.compile(r'^\s*FILE\s+"([^"]+)"', re.IGNORECASE)
 
 
 def iterate_cue_tracks(filename, track_cb):
     _iterate_tracklist_file(filename, _CUE_FILE_PATTERN, track_cb)
 
 
-_GDI_FILE_PATTERN = re.compile(r"\d+\s+\d+\s+\d+\s+\d+\s+(.*)\s+\d+")
-
-
 def iterate_gdi_tracks(filename, track_cb):
-    _iterate_tracklist_file(filename, _GDI_FILE_PATTERN, track_cb)
+    with open(filename, "r", encoding="utf-8") as track_file:
+        for line in track_file:
+            cleaned_line = line.strip()
+            if cleaned_line:
+                tokens = shlex.split(cleaned_line)
+
+                # A valid GDI track row strictly requires at least 6 standard columns:
+                # Tracknum, Start-Sector, Mode, Sector-Size, Filename, Filename-Offset
+                if len(tokens) >= 6 and tokens[0].isdigit():
+                    filename_token = tokens[4]
+                    track_cb(filename_token)
 
 
 def iterate_m3u_files(filename, file_cb):
     with open(filename, "r", encoding="utf-8") as m3u_file:
         for line in m3u_file:
+            cleaned_line = line.strip()
+            # Explicitly ignore empty lines and metadata/comment tags
+            if not cleaned_line or cleaned_line.startswith("#"):
+                continue
             file_cb(line.rstrip())
 
 
