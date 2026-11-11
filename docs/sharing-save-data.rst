@@ -34,7 +34,6 @@ example might look like this:
             --shared-base-name "Suikoden"
             --save-extension "srm"
             # --save-extension can be repeated if there are multiple save files to copy
-            --expected-name "${ROM}" # the name core will expect save files for
         )
         # we have a shared memory card, so disable the savepath-injector
         orch_args+=(

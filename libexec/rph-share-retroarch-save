@@ -28,8 +28,9 @@ def _main():
         required=True,
     )
     parser.add_argument(
-        "--expected-name",
-        help="The expected name for the game-specific saves (e.g., Super Mario World.srrm)",
+        "-r",
+        "--rom",
+        help="The rom being launched",
         required=True,
     )
     parser.add_argument(
@@ -46,10 +47,10 @@ def _main():
     args = parser.parse_args()
 
     # strip any directory information, just in case the user passed the full path
-    bn = os.path.basename(args.expected_name)
+    bn = os.path.basename(args.rom)
     bn, _ = os.path.splitext(bn)
     # TODO: sanity check ext?  if it's long, append it back?'
-    args.expected_name = bn
+    args.rom = bn
     root_work_dir = os.path.join(args.work_dir, str(os.getpid()))
     ra_save_dir = os.path.join(root_work_dir, "saves")
     config_dir = os.path.join(root_work_dir, "conf")
@@ -58,7 +59,7 @@ def _main():
         save_info.append(
             (
                 os.path.join(args.true_save_dir, f"{args.shared_base_name}.{e}"),
-                os.path.join(ra_save_dir, f"{args.expected_name}.{e}"),
+                os.path.join(ra_save_dir, f"{args.rom}.{e}"),
             )
         )
 

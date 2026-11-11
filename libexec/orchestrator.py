@@ -93,7 +93,9 @@ class EmulatorOrchestrator:
                 or args.share_retroarch_save_arg
             ):
                 exe = os.path.join(self.libexec_path, "rph-share-retroarch-save")
-                final_command.extend([exe, *args.share_retroarch_save_arg, "--"])
+                final_command.extend(
+                    [exe, "-r", args.rom, *args.share_retroarch_save_arg, "--"]
+                )
 
     def _handle_xdelta_patcher(self, args, final_command):
         if args.xdelta_patcher != _FEATURE_CHOICE_DISABLE:
