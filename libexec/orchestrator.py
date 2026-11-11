@@ -104,13 +104,13 @@ class EmulatorOrchestrator:
                 exe = os.path.join(self.libexec_path, "rph-xdelta-patcher")
                 # Uses the pristine, explicit args.rom string parameter natively!
                 final_command.extend(
-                    [exe, "-f", args.rom, *args.xdelta_patcher_arg, "--"]
+                    [exe, "-r", args.rom, *args.xdelta_patcher_arg, "--"]
                 )
 
     def _handle_setup_ps3_disc(self, args, final_command):
         if args.setup_ps3_disc != _FEATURE_CHOICE_DISABLE:
             exe = os.path.join(self.libexec_path, "rph-setup-ps3-disc")
-            final_command.extend([exe, "-f", args.rom, *args.setup_ps3_disc_arg, "--"])
+            final_command.extend([exe, "-r", args.rom, *args.setup_ps3_disc_arg, "--"])
 
     def parse_and_execute(self, custom_mutator_fn=None):
         self._parser.add_argument("args", nargs="*")

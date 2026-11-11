@@ -2,7 +2,7 @@ which xdelta3 &>/dev/null
 if [ ${?} -eq 0 ]; then
     # Configure your xdelta patching volatile RAM target workspace
     xdp_args+=(
-        --scratch "${GLOBAL_SCRATCH_PAD}"
+        --work-dir "${GLOBAL_SCRATCH_PAD}"
     )
 else
     # we don't have xdelta3, so disable patching entirely

@@ -14,7 +14,7 @@ def _main():
     )
     parser.add_argument(
         "--work-dir",
-        help="Directory use for scratch work",
+        help="Directory use for temporary files",
         default="/dev/shm/",
     )
     parser.add_argument(

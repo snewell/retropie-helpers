@@ -76,11 +76,11 @@ def _main():
         prog="setup-ps3-disc",
         description="Determine the proper path to a PS3 game, mounting a disc if necessary",
     )
-    parser.add_argument("-m", "--mount-point", help="Mount point for discs")
+    parser.add_argument("-w", "--work-dir", help="Directory to use for temporary files")
     parser.add_argument(
-        "-f",
-        "--filename",
-        help="File to patch",
+        "-r",
+        "--rom",
+        help="rom to run/mount",
     )
     parser.add_argument(
         "args",
@@ -88,14 +88,14 @@ def _main():
     )
 
     args = parser.parse_args()
-    if args.mount_point is None:
-        args.mount_point = _DEFAULT_MOUNT_POINT
-    args.mount_point = os.path.join(args.mount_point, str(os.getpid()))
+    if args.work_dir is None:
+        args.work_dir = _DEFAULT_MOUNT_POINT
+    args.work_dir = os.path.join(args.work_dir, str(os.getpid()))
 
-    args.filename, args.args = rph_files.get_filename_and_args(args.filename, args.args)
-    run_fn = _setup_game(args.filename, args.mount_point)
+    args.rom, args.args = rph_files.get_filename_and_args(args.rom, args.args)
+    run_fn = _setup_game(args.rom, args.work_dir)
     if args.args:
-        execute_fn = _make_execute_fn(args.args, args.filename)
+        execute_fn = _make_execute_fn(args.args, args.rom)
         run_fn(execute_fn)
 
 
