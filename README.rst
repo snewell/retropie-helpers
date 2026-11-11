@@ -21,6 +21,11 @@ What This Solves
   folders, mounts them on the fly (without root permissions) and passes the
   appropriate path to RPCS3--you can treat a PS3 dump identically to games from
   any other system.
+* **Per-game PS2 Save Data**: Instead of global memory cards, you get a unique
+  memory card for every PS2 game.  If you want to share cards though...
+* **Trivial to Share Memory Cards**: Playing *Arc the Lad Collection*?
+  *Suikoden*?  *dot Hack*?  Automatically and transparently use the same memory
+  card for these games (or any other pattern you want).
 
 Quick Start
 -----------
