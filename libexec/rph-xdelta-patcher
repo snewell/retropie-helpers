@@ -9,7 +9,7 @@ import subprocess
 
 import rph_files
 
-_DEFAULT_SCRATCH = "/mnt/scratch"
+_DEFAULT_SCRATCH = "/dev/shm"
 
 
 def _do_xdelta(base_file, patch_file, scratch):

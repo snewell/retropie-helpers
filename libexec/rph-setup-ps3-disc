@@ -7,7 +7,7 @@ import subprocess
 
 import rph_files
 
-_DEFAULT_MOUNT_POINT = "/mnt/ps3-disc"
+_DEFAULT_MOUNT_POINT = "/dev/shm"
 
 
 def _mount(game_file, mount_dir):
