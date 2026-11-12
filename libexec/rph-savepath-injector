@@ -29,7 +29,6 @@ def _main():
         prog="savefile-injector",
         description="Temporarily override the savefile directory in retroarch",
     )
-    parser.add_argument("--config-file", help="Specific path to write config file")
     parser.add_argument(
         "--work-dir",
         help="Directory to write temporary file (not used if --config-file is passwed)",
@@ -50,22 +49,21 @@ def _main():
     must_clean = False
     if _needs_save_injector(config_path):
         system = rph_files.get_ra_system_from_path(config_path)
-        if not args.config_file:
-            args.config_file = os.path.join(
-                args.work_dir, f"ra_save_override_{system}_{os.getpid()}.cfg"
-            )
+        config_file = os.path.join(
+            args.work_dir, f"ra_save_override_{system}_{os.getpid()}.cfg"
+        )
         save_dir = os.path.join(args.root_save_dir, system)
         # make sure the directory exists
         os.makedirs(save_dir, exist_ok=True)
-        _write_config(args.config_file, save_dir)
-        args.args.extend(["--appendconfig", args.config_file])
+        _write_config(config_file, save_dir)
+        args.args.extend(["--appendconfig", config_file])
         must_clean = True
 
     try:
         subprocess.run(args.args, check=True)
     finally:
         if must_clean:
-            os.remove(args.config_file)
+            os.remove(config_file)
 
 
 if __name__ == "__main__":
