@@ -114,6 +114,11 @@ class EmulatorOrchestrator:
             exe = os.path.join(self.libexec_path, "rph-setup-ps3-disc")
             final_command.extend([exe, "-r", args.rom, *args.setup_ps3_disc_arg, "--"])
 
+    def _handle_m3u_breaker(self, args, final_command):
+        if args.m3u_breaker != _FEATURE_CHOICE_DISABLE:
+            exe = os.path.join(self.libexec_path, "rph-m3u-breaker")
+            final_command.extend([exe, "-r", args.rom, *args.m3u_breaker_arg, "--"])
+
     def parse_and_execute(self, custom_mutator_fn=None):
         self._parser.add_argument("args", nargs="*")
         args = self._parser.parse_args()

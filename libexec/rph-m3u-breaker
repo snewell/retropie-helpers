@@ -1,0 +1,74 @@
+#!/usr/bin/python3
+
+import argparse
+import os
+import os.path
+import shutil
+import subprocess
+
+import rph_files
+
+
+def _main():
+    parser = argparse.ArgumentParser(
+        prog="m3u-breaker",
+        description="Repalces an m3u argument with the first disc",
+    )
+    parser.add_argument(
+        "-r",
+        "--rom",
+        help="rom to launch",
+        required=True,
+    )
+    parser.add_argument(
+        "-w",
+        "--work-dir",
+        help="Directory to use for temporary files",
+        default="/dev/shm",
+    )
+    parser.add_argument(
+        "args",
+        nargs="*",
+    )
+    args = parser.parse_args()
+    args.work_dir = os.path.join(args.work_dir, str(os.getpid()))
+    _, ext = os.path.splitext(args.rom)
+    file_list = []
+    if ext == ".m3u":
+        # do work
+        m3u_path = os.path.dirname(args.rom)
+
+        def _cb(m3u_part):
+            file_list.append(os.path.join(m3u_path, m3u_part))
+
+        rph_files.iterate_m3u_files(args.rom, _cb)
+    try:
+        if len(file_list) > 0:
+            # we need to break it
+            if len(file_list) > 1:
+                # we need a workdir and to symlink
+                os.makedirs(args.work_dir, exist_ok=True)
+                for i, f in enumerate(file_list):
+                    # TODO: handle cue/gdi
+                    bn = os.path.basename(f)
+                    tn = os.path.join(args.work_dir, bn)
+                    os.symlink(f, tn)
+                    file_list[i] = tn
+
+            # replace/append the updated path
+            replaced = False
+            for i in range(len(args.args)):
+                if args.args[i] == args.rom:
+                    args.args[i] = file_list[0]
+                    replaced = True
+            if not replaced:
+                args.args.append(file_list[0])
+
+        subprocess.run(args.args, check=True)
+    finally:
+        if os.path.exists(args.work_dir):
+            shutil.rmtree(args.work_dir)
+
+
+if __name__ == "__main__":
+    _main()

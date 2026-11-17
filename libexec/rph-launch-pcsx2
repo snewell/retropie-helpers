@@ -28,6 +28,7 @@ def main():
         EmulatorOrchestrator("rph-launch-pcsx2", "pcsx2 orchestration pipeline")
         .add_feature("unique_memcard")
         .add_feature("xdelta_patcher")
+        .add_feature("m3u_breaker")
         .parse_and_execute(custom_mutator_fn=pcsx2_cli_mutator)
     )
 
