@@ -10,4 +10,3 @@ tool_map[rpcs3_args]="--emu-arg"
 # Declare the variables so the .rc script can populate them natively
 sp3d_args=()
 rpcs3_args=()
-orch_args=()

@@ -8,6 +8,5 @@ tool_map[xdp_args]="--xdelta-patcher-arg"
 tool_map[dolphin_args]="--emu-arg"
 
 # Declare the variables so the .rc script can populate them natively
-umc_args=()
+xdp_args=()
 dolphin_args=()
-orch_args=()

@@ -54,6 +54,7 @@ rph_load_metadata "rom_metadata"
 DATA_PROFILE="${LIBEXEC_DIR}/../share/rph-pipeline-data/${RPH_EMULATOR_ID}.data"
 if [ -f "${DATA_PROFILE}" ]; then
     source "${DATA_PROFILE}"
+    orch_args=()
 else
     echo "No data file available for ${TARGET_LAUNCHER} (expected ${DATA_PROFILE})" >&2
     exit 1

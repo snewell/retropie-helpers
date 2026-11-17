@@ -12,4 +12,3 @@ tool_map[pcsx2_args]="--emu-arg"
 umc_args=()
 xdp_args=()
 pcsx2_args=()
-orch_args=()

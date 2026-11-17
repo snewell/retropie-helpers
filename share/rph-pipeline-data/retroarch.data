@@ -10,4 +10,4 @@ tool_map[sras_args]="--share-retroarch-save-arg"
 # Declare the variables so the .rc script can populate them natively
 spi_args=()
 xdp_args=()
-orch_args=()
+sras_args=()
