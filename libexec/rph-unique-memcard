@@ -65,8 +65,6 @@ def main():
     _verify_no_cards(memcards)
     save_file = os.path.join(args.save_dir, f"{args.card_name}.{args.srm_extension}")
 
-    print(f"save_file={save_file}")
-    print(f"mp={args.memcard_path}")
     if os.path.isfile(save_file):
         shutil.copy2(save_file, args.memcard_path)
 
