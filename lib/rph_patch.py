@@ -87,7 +87,7 @@ _SPECIAL_EXTENSIONS = {
 
 
 def build_patch_info(filename, patch_extension):
-    base, ext = os.path.splitext(filename)
+    _, ext = os.path.splitext(filename)
     ext_fn = _SPECIAL_EXTENSIONS.get(ext)
     if ext_fn:
         return ext_fn(filename, patch_extension)

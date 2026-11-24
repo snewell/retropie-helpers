@@ -1,16 +1,13 @@
 #!/usr/bin/python3
 
 import argparse
-import glob
 import os
 import os.path
 import shutil
 import subprocess
 
-import rph_files
+import rph_cli
 import rph_patch
-
-_DEFAULT_SCRATCH = "/dev/shm"
 
 
 def _make_xdelta_patcher(work_dir):
@@ -18,7 +15,7 @@ def _make_xdelta_patcher(work_dir):
         base = os.path.basename(original)
         romdir = os.path.dirname(original)
         out_file = os.path.join(work_dir, base)
-        no_ext, ext = os.path.splitext(base)
+        no_ext, _ = os.path.splitext(base)
         patch = os.path.join(f"{romdir}", f"{no_ext}.xdelta")
         subprocess.run(
             [
@@ -40,33 +37,11 @@ def _main():
         prog="xdelta-patcher",
         description="Apply available xdelta patches before launching emulator",
     )
-    parser.add_argument(
-        "-p",
-        "--preserve",
-        action="store_true",
-        help="Don't clean scratch directory",
-    )
-    parser.add_argument("-w", "--work-dir", help="Directory to use for temporary files")
-    parser.add_argument(
-        "-S",
-        "--symlinks",
-        help="Create symlinks to related files (i.e., memory cards)",
-        action="store_true",
-    )
-    parser.add_argument(
-        "-r",
-        "--rom",
-        help="rom to patch",
-        required=True,
-    )
-    parser.add_argument(
-        "args",
-        nargs="*",
-    )
+    rph_cli.add_rom_argument(parser)
+    rph_cli.add_workdir_argument(parser)
+    rph_cli.add_trailing_arguments(parser)
 
     args = parser.parse_args()
-    if args.work_dir is None:
-        args.work_dir = _DEFAULT_SCRATCH
     args.work_dir = os.path.join(args.work_dir, str(os.getpid()))
     pi = rph_patch.build_patch_info(args.rom, "xdelta")
     try:
@@ -76,13 +51,7 @@ def _main():
                 pi, args.work_dir, _make_xdelta_patcher(args.work_dir)
             )
             target = os.path.join(args.work_dir, os.path.basename(args.rom))
-            replaced = False
-            for i in range(len(args.args)):
-                if args.args[i] == args.rom:
-                    args.args[i] = target
-                    replaced = True
-            if not replaced:
-                args.args.append(target)
+            rph_cli.replace_or_append_arg(args.args, args.rom, target)
 
         # everything is patched, execute
         subprocess.run(args.args, check=True)

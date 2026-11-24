@@ -5,6 +5,7 @@ import os
 import os.path
 import subprocess
 
+import rph_cli
 import rph_files
 
 _DEFAULT_MOUNT_POINT = "/dev/shm"
@@ -39,7 +40,7 @@ def _make_game_path(base_dir):
 
 def _setup_game(game_path, mount_dir):
     if os.path.isfile(game_path):
-        # regular file, assume it's a disc'
+        # regular file, assume it's a disc
         def _mount_and_run(run_fn):
             _mount(game_path, mount_dir)
             run_file = _make_game_path(mount_dir)
@@ -65,7 +66,7 @@ def _setup_game(game_path, mount_dir):
 
 def _make_execute_fn(args, original_path):
     def _run_fn(run_path):
-        rph_files.replace_args(args, original_path, run_path)
+        rph_cli.replace_or_append_arg(args, original_path, run_path)
         subprocess.run(args, check=True)
 
     return _run_fn

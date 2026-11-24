@@ -51,18 +51,6 @@ def get_filename_and_args(filename, args):
     return (filename, args)
 
 
-def replace_args(args, target, replacement):
-    # everything is patched, execute
-    replaced = False
-    for i in range(len(args)):
-        if args[i] == target:
-            args[i] = replacement
-            replaced = True
-    if not replaced:
-        args.append(replacement)
-    return args
-
-
 def get_ra_config_path(args):
     config_idx = args.index("--config")
     # if this is out of range, we've got a weird command line; okay to crash, just check the logs
